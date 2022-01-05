@@ -25,12 +25,15 @@ set cpo&vim
 
 " Default options
 let s:default_delay = 0
-let s:default_window = 'vertical botright 30new'
+let s:default_window = 'bel 15new'
 let s:default_compact = 0
 
 let s:QUOTE  = '"'
 let s:REPLAY = '@'
 let s:CTRL_R = "\<c-r>"
+let s:PWD = getcwd()
+let g:pwd = s:PWD
+  let s:buffers = {}
 
 let s:buf_hideseek = 0
 
@@ -62,20 +65,16 @@ function! s:close()
 endfunction
 
 " Appends macro list for the specified group to Peekaboo window
-function! s:append_group(title, regs)
+function! s:append_group(title, buffers)
   let compact = get(g:, 'hideseek_compact', s:default_compact)
   if !compact | call append(line('$'), a:title.':') | endif
-  for r in a:regs
+  for b in a:buffers 
     try
-      if r == '%'     | let val = s:buf_current
-      elseif r == '#' | let val = s:buf_alternate
-      else            | let val = eval('@'.r)[:&columns]
-      endif
-      if empty(val)
-        continue
-      endif
-      let s:regs[printf('%s', r)] = line('$')
-      call append(line('$'), printf(' %s: %s', r, substitute(val, '^\s*', '', '')))
+      call append(line('$'), printf('%s',b))
+      let b = substitute(b,'[\x7E]',$HOME,"")
+      let b = substitute(b,s:PWD,".",'')
+      let parts = split(b," ") 
+      s:buffers[parts[0]] = line('$') 
     catch
     endtry
   endfor
@@ -99,12 +98,8 @@ function! s:open(mode)
     autocmd CursorMoved <buffer> bd
   augroup END
 
-  let s:regs = {}
-  " call s:append_group('Special', ['"', '*', '+', '-'])
-  " call s:append_group('Read-only', a:mode ==# s:REPLAY ? ['.', ':'] : ['.', '%', '#', '/', ':'])
-  " call s:append_group('Numbered', map(range(0, 9), 'string(v:val)'))
-  " call s:append_group('Named', map(range(97, 97 + 25), 'nr2char(v:val)'))
-  normal! "_dd
+  call s:append_group('buffer', split(execute('ls'),'\n'))
+  " normal! "_dd
 endfunction
 
 " Checks if the buffer for the position is visible on screen
@@ -128,7 +123,7 @@ endfunction
 function! s:feed(count, mode, reg, rest)
   call feedkeys(a:count > 1 ? a:count : '', 'n')
   if a:mode ==# s:QUOTE
-    call feedkeys('"'.a:reg, 'n')
+    call feedkeys('buffer '.a:reg, 'n')
     call feedkeys(a:rest)
   elseif a:mode ==# s:CTRL_R
     call feedkeys("\<c-r>".a:reg, 'n')
@@ -209,8 +204,11 @@ function! hideseek#aboo()
     endwhile
 
     let rest = ''
-    if mode ==# s:QUOTE && has_key(s:regs, tolower(reg))
-      let line = s:regs[tolower(reg)]
+    let g:mode = mode
+    let g:buffers = s:buffers
+    if mode ==# s:QUOTE && has_key(s:buffers, tolower(reg))
+      let line = s:buffers[tolower(reg)]
+      let g:line = line
       execute line
       execute 'syntax region hideseekSelected start=/\%'.line.'l\%5c/ end=/$/'
       setlocal cursorline
