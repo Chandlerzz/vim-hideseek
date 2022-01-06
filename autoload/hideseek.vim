@@ -1,24 +1,6 @@
 " The MIT License (MIT)
 "
 " Copyright (c) 2022 zhongzhong
-"
-" Permission is hereby granted, free of charge, to any person obtaining a copy
-" of this software and associated documentation files (the "Software"), to deal
-" in the Software without restriction, including without limitation the rights
-" to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-" copies of the Software, and to permit persons to whom the Software is
-" furnished to do so, subject to the following conditions:
-"
-" The above copyright notice and this permission notice shall be included in
-" all copies or substantial portions of the Software.
-"
-" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-" AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-" OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-" THE SOFTWARE.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -28,9 +10,6 @@ let s:default_delay = 0
 let s:default_window = 'bel 15new'
 let s:default_compact = 0
 
-let s:QUOTE  = '"'
-let s:REPLAY = '@'
-let s:CTRL_R = "\<c-r>"
 let s:PWD = getcwd()
 let g:pwd = s:PWD
   let s:buffers = {}
@@ -87,7 +66,7 @@ function! s:open(mode)
   execute get(g:, 'hideseek_window', s:default_window)
   let s:buf_hideseek = bufnr('')
   setlocal nonumber buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
-  \ modifiable statusline=>\ Registers nocursorline nofoldenable
+  \ modifiable statusline=>\ Buffers nocursorline nofoldenable
   if exists('&relativenumber')
     setlocal norelativenumber
   endif
@@ -98,7 +77,7 @@ function! s:open(mode)
     autocmd CursorMoved <buffer> bd
   augroup END
 
-  call s:append_group('buffer', split(execute('ls'),'\n'))
+  call <SID>append_group('buffer', split(execute('ls'),'\n'))
   " normal! "_dd
 endfunction
 
@@ -133,7 +112,7 @@ function! s:getpos()
   return {'tab': tabpagenr(), 'buf': bufnr(''), 'win': winnr(), 'cnt': winnr('$')}
 endfunction
 
-function! hideseek#peek(count, mode, visualmode)
+function! hideseek#hide(count, mode, visualmode)
   " First check if we should start hideseek, if not just return the mode key
   let timeout = get(g:, 'hideseek_delay', s:default_delay)
   if !s:wait_with_timeout(timeout)
@@ -144,7 +123,7 @@ function! hideseek#peek(count, mode, visualmode)
   return "\<Plug>(hideseek)"
 endfunction
 
-function! hideseek#aboo()
+function! hideseek#seek()
   let [cnt, mode, visualmode] = s:args
 
   if s:is_open()
@@ -194,7 +173,7 @@ function! hideseek#aboo()
     let rest = ''
     while 1
       let g:buffers = s:buffers
-      if mode ==# s:QUOTE && has_key(s:buffers, tolower(reg))
+      if has_key(s:buffers, tolower(reg))
         let line = s:buffers[tolower(reg)]
         let g:line = line
         setlocal syntax=off
@@ -203,6 +182,11 @@ function! hideseek#aboo()
         execute 'syntax region hideseekSelected start=/\%'.line.'l\%5c/ end=/$/'
         setlocal cursorline
         call s:gv(visualmode, visible)
+        if reg =~ '^\d\+$'
+          echom ""
+        else
+          return
+        endif
         let rest = nr2char(getchar())
           if rest =~ '^\d\+$'
             let reg .= rest
