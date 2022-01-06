@@ -1,6 +1,6 @@
 " The MIT License (MIT)
 "
-" Copyright (c) 2017 Junegunn Choi
+" Copyright (c) 2022 zhongzhong
 "
 " Permission is hereby granted, free of charge, to any person obtaining a copy
 " of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,6 @@
 " THE SOFTWARE.
 
 nnoremap <silent> <Plug>(hideseek) :<c-u>call hideseek#aboo()<cr>
-" xnoremap <silent> <Plug>(hideseek) :<c-u>call hideseek#aboo()<cr>
-" inoremap <silent> <Plug>(hideseek) <c-\><c-o>:<c-u>call hideseek#aboo()<cr>
 
 function! hideseek#on()
   if get(b:, 'hideseek_on', 0)
