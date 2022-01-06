@@ -1,5 +1,3 @@
-" The MIT License (MIT)
-"
 " Copyright (c) 2022 zhongzhong
 
 let s:cpo_save = &cpo
