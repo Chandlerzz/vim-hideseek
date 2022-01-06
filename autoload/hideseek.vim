@@ -70,11 +70,11 @@ function! s:append_group(title, buffers)
   if !compact | call append(line('$'), a:title.':') | endif
   for b in a:buffers 
     try
-      call append(line('$'), printf('%s',b))
       let b = substitute(b,'[\x7E]',$HOME,"")
       let b = substitute(b,s:PWD,".",'')
+      call append(line('$'), printf('%s',b))
       let parts = split(b," ") 
-      s:buffers[parts[0]] = line('$') 
+      let s:buffers[parts[0]] = line('$') 
     catch
     endtry
   endfor
@@ -119,18 +119,6 @@ function! s:gv(visualmode, visible)
   endif
 endfunction
 
-" Feeds the final key sequence
-function! s:feed(count, mode, reg, rest)
-  call feedkeys(a:count > 1 ? a:count : '', 'n')
-  if a:mode ==# s:QUOTE
-    call feedkeys('buffer '.a:reg, 'n')
-    call feedkeys(a:rest)
-  elseif a:mode ==# s:CTRL_R
-    call feedkeys("\<c-r>".a:reg, 'n')
-  else
-    call feedkeys('@'.a:reg, 'n')
-  endif
-endfunction
 
 let s:scroll = {
 \ "\<up>":     "\<c-y>", "\<down>":     "\<c-e>",
@@ -204,18 +192,29 @@ function! hideseek#aboo()
     endwhile
 
     let rest = ''
-    let g:mode = mode
-    let g:buffers = s:buffers
-    if mode ==# s:QUOTE && has_key(s:buffers, tolower(reg))
-      let line = s:buffers[tolower(reg)]
-      let g:line = line
-      execute line
-      execute 'syntax region hideseekSelected start=/\%'.line.'l\%5c/ end=/$/'
-      setlocal cursorline
-      call setline(line('.'), substitute(getline('.'), ' .', ' '.reg, ''))
-      call s:gv(visualmode, visible)
-      let rest = nr2char(getchar())
-    endif
+    while 1
+      let g:buffers = s:buffers
+      if mode ==# s:QUOTE && has_key(s:buffers, tolower(reg))
+        let line = s:buffers[tolower(reg)]
+        let g:line = line
+        setlocal syntax=off
+        setlocal syntax=on
+        execute line
+        execute 'syntax region hideseekSelected start=/\%'.line.'l\%5c/ end=/$/'
+        setlocal cursorline
+        call s:gv(visualmode, visible)
+        let rest = nr2char(getchar())
+          if rest =~ '^\d\+$'
+            let reg .= rest
+            let rest = ''
+          else
+            break
+          endif
+        else
+          echom("buffer not exists")
+          return
+      endif
+    endwhile
 
     " - Make sure that we're back to the original tab/window/buffer
     "   - e.g. g:hideseek_window = 'tabnew' / 'enew'
@@ -230,12 +229,16 @@ function! hideseek#aboo()
     if visualmode
       normal! gv
     endif
-    call s:feed(cnt, mode, reg, rest)
+    if rest == 'q'
+      execute "vert sb".reg
+    else
+      execute "buffer ".reg
+    endif
   catch /^Vim:Interrupt$/
     return
   finally
     let [&showtabline, &laststatus] = [stl, lst]
-    call s:close()
+    " call s:close()
     redraw
   endtry
 endfunction
