@@ -45,6 +45,7 @@ endfunction
 function! s:append_group(title, buffers)
   let compact = get(g:, 'hideseek_compact', s:default_compact)
   if !compact | call append(line('$'), a:title.':') | endif
+  if !compact | call append(line('$'), s:PWD) | endif
   for b in a:buffers 
     try
       let b = substitute(b,'[\x7E]',$HOME,"")
@@ -144,8 +145,8 @@ function! hideseek#seek()
   try
     while 1
       let ch  = getchar()
-      let reg = nr2char(ch)
-      let key = get(s:scroll, ch, get(s:scroll, reg, ''))
+      let bufnum = nr2char(ch)
+      let key = get(s:scroll, ch, get(s:scroll, bufnum, ''))
       if !empty(key)
         execute 'normal!' key
         call s:gv(visualmode, visible)
@@ -157,7 +158,7 @@ function! hideseek#seek()
         let [&showtabline, &laststatus] = [stl, lst]
         call s:gv(visualmode, visible)
       endif
-      if reg != ' '
+      if bufnum != ' '
         break
       endif
       if !zoom
@@ -171,8 +172,8 @@ function! hideseek#seek()
     let rest = ''
     while 1
       let g:buffers = s:buffers
-      if has_key(s:buffers, tolower(reg))
-        let line = s:buffers[tolower(reg)]
+      if has_key(s:buffers, tolower(bufnum))
+        let line = s:buffers[tolower(bufnum)]
         let g:line = line
         setlocal syntax=off
         setlocal syntax=on
@@ -180,14 +181,14 @@ function! hideseek#seek()
         execute 'syntax region hideseekSelected start=/\%'.line.'l\%5c/ end=/$/'
         setlocal cursorline
         call s:gv(visualmode, visible)
-        if reg =~ '^\d\+$'
+        if bufnum =~ '^\d\+$'
           echom ""
         else
           return
         endif
         let rest = nr2char(getchar())
           if rest =~ '^\d\+$'
-            let reg .= rest
+            let bufnum .= rest
             let rest = ''
           else
             break
@@ -212,9 +213,9 @@ function! hideseek#seek()
       normal! gv
     endif
     if rest == 'q'
-      execute "vert sb".reg
+      execute "vert sb".bufnum
     else
-      execute "buffer ".reg
+      execute "buffer ".bufnum
     endif
   catch /^Vim:Interrupt$/
     return
