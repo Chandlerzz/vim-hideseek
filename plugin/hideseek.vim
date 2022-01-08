@@ -9,7 +9,7 @@ function! hideseek#on()
 
   let prefix = get(g:, 'hideseek_prefix', '')
   let ins_prefix = get(g:, 'hideseek_ins_prefix', '')
-  execute 'nmap <buffer> <expr> '.prefix.    '<leader>e     hideseek#hide(v:count1, ''"'',  0)'
+  execute 'nmap <buffer> <expr> '.prefix.    '<leader>ee     hideseek#hide(v:count1, ''"'',  0)'
   let b:hideseek_on = 1
   return ''
 endfunction
