@@ -5,7 +5,8 @@ set cpo&vim
 
 " Default options
 let s:default_delay = 0
-let s:default_window = 'bel 15new'
+let s:default_once_window = 'bel 15new'
+let s:default_keep_window = 'vert lefta 30new'
 let s:default_compact = 0
 
 let s:PWD = getcwd()
@@ -62,7 +63,11 @@ endfunction
 " Opens hideseek window
 function! s:open(mode)
   let [s:buf_current, s:buf_alternate, s:winrestcmd] = [@%, @#, winrestcmd()]
-  execute get(g:, 'hideseek_window', s:default_window)
+  if a:mode == "once"
+    execute get(g:, 'hideseek_window', s:default_once_window)
+  else
+    execute get(g:, 'hideseek_window', s:default_keep_window)
+  endif
   let s:buf_hideseek = bufnr('')
   setlocal nonumber buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
   \ modifiable statusline=>\ Buffers nocursorline nofoldenable
@@ -131,6 +136,9 @@ function! hideseek#seek()
 
   let positions = { 'current': s:getpos() }
   call s:open(mode)
+  if mode == "keep"
+    return 0
+  endif
   let positions.hideseek = s:getpos()
 
   let inplace = positions.current.tab == positions.hideseek.tab &&

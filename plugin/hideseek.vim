@@ -9,7 +9,9 @@ function! hideseek#on()
 
   let prefix = get(g:, 'hideseek_prefix', '')
   let ins_prefix = get(g:, 'hideseek_ins_prefix', '')
-  execute 'nmap <buffer> <expr> '.prefix.    '<leader>ee     hideseek#hide(v:count1, ''"'',  0)'
+  execute 'nmap <buffer> <expr> '.prefix.    '<leader>e     hideseek#hide(v:count1, "keep",  0)'
+  execute 'nmap <buffer> <expr> '.prefix.    '<leader>ee     hideseek#hide(v:count1, "once",  0)'
+  execute 'badd /tmp/bufferList.hideseek'
   let b:hideseek_on = 1
   return ''
 endfunction
@@ -23,6 +25,7 @@ function! hideseek#off()
   let ins_prefix = get(g:, 'hideseek_ins_prefix', '')
   execute 'nunmap <buffer> '.prefix.'"'
   let b:hideseek_on = 0
+evert lefta 30new
 endfunction
 
 augroup hideseek_init
