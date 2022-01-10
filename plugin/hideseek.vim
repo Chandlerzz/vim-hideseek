@@ -30,6 +30,6 @@ endfunction
 
 augroup hideseek_init
   autocmd!
-  autocmd BufEnter * if !exists('*getcmdwintype') || empty(getcmdwintype()) | call hideseek#on() | endif
+  " autocmd BufEnter * if !exists('*getcmdwintype') || empty(getcmdwintype()) | call hideseek#on() | endif
 augroup END
 
