@@ -20,4 +20,4 @@ highlight default link hideseekSelected Todo
 " unlet b:current_syntax
 
 let b:current_syntax = "hideseek"   
-setlocal nobuflisted nonumber norelativenumber
+setlocal nobuflisted nonumber norelativenumber statusline=\ Buffers
