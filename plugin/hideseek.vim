@@ -9,9 +9,7 @@ function! hideseek#on()
 
   let prefix = get(g:, 'hideseek_prefix', '')
   let ins_prefix = get(g:, 'hideseek_ins_prefix', '')
-  execute 'nmap <buffer> <expr> '.prefix.    '<leader>e     hideseek#hide(v:count1, "keep",  0)'
   execute 'nmap <buffer> <expr> '.prefix.    '<leader>ee     hideseek#hide(v:count1, "once",  0)'
-  execute 'badd /tmp/bufferList.hideseek'
   let b:hideseek_on = 1
   return ''
 endfunction
@@ -30,6 +28,6 @@ endfunction
 
 augroup hideseek_init
   autocmd!
-  " autocmd BufEnter * if !exists('*getcmdwintype') || empty(getcmdwintype()) | call hideseek#on() | endif
+  autocmd BufEnter * if !exists('*getcmdwintype') || empty(getcmdwintype()) | call hideseek#on() | endif
 augroup END
 
