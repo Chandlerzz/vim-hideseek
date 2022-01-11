@@ -27,5 +27,4 @@ Customization
 
 License
 -------
-
 MIT
