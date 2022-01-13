@@ -13,8 +13,6 @@ highlight default link hideseekTitleColon NonText
 highlight default link hideseekReg Label
 highlight default link hideseekRegColon NonText
 highlight default link hideseekSelected Todo
-" setlocal nonumber buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
-"   \ modifiable statusline=>\ Buffers nocursorline nofoldenable
 
 
 " unlet b:current_syntax
