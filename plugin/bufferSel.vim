@@ -6,6 +6,7 @@ if has('nvim')
 else 
   let s:bufname = "/tmp/bufferList/".rand().".hideseek"
 endif
+let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
      " autocmd bufEnter * call LRCread()
@@ -31,26 +32,9 @@ function! OpenBufferList()
     execute "wincmd p"
   endif
 endfunction
+
 function! LRCread()
-    let $pwd= getcwd()
-    let $lrcfilename = g:LRCfileName
-    let currbufnr = bufnr("%")
-    let currbufname = expand('#'.currbufnr.':p') 
-    if (currbufname == "")
-        execute "" 
-    elseif (match(currbufname,"/tmp")> -1)
-        execute "" 
-    elseif (match(currbufname,"/.git")> -1)
-        execute "" 
-    else
-          execute "silent ! echo ".currbufname." >> " . $lrcfilename
-    endif
-    let l:command = "sh ". expand("~/dotfile/vim/script/LRC.sh") ." ". $lrcfilename ." " . $pwd
-    if has("nvim")
-        let job = jobstart(l:command, {"in_io": "null", "out_io": "null", "err_io": "null"})
-    else
-        let job = job_start(l:command, {"in_io": "null", "out_io": "null", "err_io": "null"})
-    end
+    let pwd= getcwd()
 endfunction
 
 function! BufferRead()
@@ -74,6 +58,16 @@ function! BufferRead()
         endif
         let currbufnr = currbufnr + 1
     endwhile
+    let lrclines = system("cat ".s:lrcname)
+    let lrclines = split(lrclines,"\n")
+    for lrcline in lrclines 
+      if(match(lrcline, pwd) > -1)
+        let lrcline = split(lrcline,"%")[0]
+        let lrcline = substitute(lrcline,pwd,"","")
+        let nummatches += 1
+        call setbufline(bufnr,nummatches,lrcline)
+      endif
+    endfor
 endfunction
 
 
