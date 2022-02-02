@@ -1,1 +1,1 @@
-au BufRead,BufNewFile *.hideseek set filetype=hideseek
+au BufRead,BufNewFile,BufAdd *.hideseek set filetype=hideseek

@@ -9,7 +9,6 @@ endif
 let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
-     " autocmd bufEnter * call LRCread()
      autocmd bufEnter,tabEnter * call BufferRead()
 augroup END
 
@@ -29,6 +28,7 @@ function! OpenBufferList()
     execute "vert topleft sbuffer ".bufnr." \| vert resize 40"
     setlocal nonumber norelativenumber  nobuflisted noswapfile nowrap
     \ modifiable statusline=>\ Buffers nocursorline nofoldenable
+    setlocal filetype=hideseek
     execute "wincmd p"
   endif
 endfunction
@@ -46,26 +46,33 @@ function! BufferRead()
     let bufcount = bufnr("$")
     let currbufnr = 1
     let nummatches = 1
-    let firstmatchingbufnr = 0
+    " set header buffers 
+    call setbufline(bufnr, nummatches, "BUFFERS")
+    let nummatches = nummatches + 1
     while currbufnr <= bufcount
         if(bufexists(currbufnr))
           let currbufname = expand('#'.currbufnr.':p') 
           if(match(currbufname, pwd) > -1)
             let bufname = currbufnr . ": ".expand('#'.currbufnr.':p:.')
-            let nummatches += 1
             call setbufline(bufnr,nummatches,bufname)
+            let nummatches += 1
           endif
         endif
         let currbufnr = currbufnr + 1
     endwhile
+    " set header lrc
+    call setbufline(bufnr, nummatches, "LRC")
+    let nummatches += 1
     let lrclines = system("cat ".s:lrcname)
     let lrclines = split(lrclines,"\n")
-    for lrcline in lrclines 
+    for index in range(len(lrclines)) 
+      let lrcline = lrclines[index]
       if(match(lrcline, pwd) > -1)
         let lrcline = split(lrcline,"%")[0]
         let lrcline = substitute(lrcline,pwd,"","")
-        let nummatches += 1
+        let lrcline = (index+1).": ".lrcline
         call setbufline(bufnr,nummatches,lrcline)
+        let nummatches += 1
       endif
     endfor
 endfunction
