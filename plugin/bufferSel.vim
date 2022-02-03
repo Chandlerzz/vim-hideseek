@@ -1,5 +1,6 @@
 " bufferSel
-nnoremap <expr> e SelectBuffer("") ..'_'
+nnoremap ee :call SelectBuffer("")<cr>
+nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap <leader>e :call OpenBufferList()<cr>
 if has('nvim')
   let s:bufname = "/tmp/bufferList/".luaeval('math.random(1000000,1000000000)').".hideseek"
@@ -79,37 +80,27 @@ endfunction
 
 
 function SelectBuffer(type) abort
-  if a:type == ''
-    set opfunc=SelectBuffer
-    return 'g@'
-  endif
-
-  let sel_save = &selection
-  if has("nvim")
-      let reg_save = @@
-  else
-      let reg_save = getreginfo('"')
-  end
-  let cb_save = &clipboard
-  let visual_marks_save = [getpos("'<"), getpos("'>")]
-
-  try
-    set clipboard= selection=inclusive
-  finally
   let charr = s:inputtarget()
   let head=charr[:-2]
   let tail=charr[-1:-1]
-  if tail =~ "e"
-      silent exe 'e #' ..head 
+  if (a:type == "lrc")
+    let lrclines = system("cat ".s:lrcname)
+    let lrclines = split(lrclines,"\n")
+    let lrcline = lrclines[head-1]
+    let lrcline = split(lrcline,"%")[0]
+    let g:lrcline = lrcline
+    if tail =~ "e"
+        silent exe 'e ' ..lrcline 
+    else
+        silent exe 'vsp ' ..lrcline 
+    endif
   else
-      silent exe 'vsp #' ..head 
+    if tail =~ "e"
+        silent exe 'e #' ..head 
+    else
+        silent exe 'vsp #' ..head 
+    endif
   endif
-    call setreg('"', reg_save)
-    call setpos("'<", visual_marks_save[0])
-    call setpos("'>", visual_marks_save[1])
-    let &clipboard = cb_save
-    let &selection = sel_save
-endtry
 endfunction
 
 function! s:getchar()
