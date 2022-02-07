@@ -27,7 +27,7 @@ function! OpenBufferList()
     endfor
   else
     execute "vert topleft sbuffer ".bufnr." \| vert resize 40"
-    setlocal nonumber norelativenumber  nobuflisted noswapfile nowrap
+    setlocal nonumber norelativenumber  nobuflisted noswapfile wrap
     \ modifiable statusline=>\ Buffers nocursorline nofoldenable
     setlocal filetype=hideseek
     execute "wincmd p"
