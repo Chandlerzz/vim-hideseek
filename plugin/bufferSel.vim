@@ -1,6 +1,7 @@
 " bufferSel
 nnoremap ee :call SelectBuffer("")<cr>
 nnoremap ew :call SelectBuffer("lrc")<cr>
+nnoremap ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>e :call OpenBufferList()<cr>
 if has('nvim')
   let s:bufname = "/tmp/bufferList/".luaeval('math.random(1000000,1000000000)').".hideseek"
@@ -94,6 +95,9 @@ function SelectBuffer(type) abort
     else
         silent exe 'vsp ' ..lrcline 
     endif
+  elseif (a:type == "delete")
+    call system("inoswp -s ".head)
+    call BufferRead()
   else
     if tail =~ "e"
         silent exe 'e #' ..head 
