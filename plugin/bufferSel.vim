@@ -49,19 +49,19 @@ function! BufferRead()
     let currbufnr = 1
     let nummatches = 1
     " set header buffers 
-    call setbufline(bufnr, nummatches, "BUFFERS")
-    let nummatches = nummatches + 1
-    while currbufnr <= bufcount
-        if(bufexists(currbufnr))
-          let currbufname = expand('#'.currbufnr.':p') 
-          if(match(currbufname, pwd) > -1)
-            let bufname = currbufnr . ": ".expand('#'.currbufnr.':p:.')
-            call setbufline(bufnr,nummatches,bufname)
-            let nummatches += 1
-          endif
-        endif
-        let currbufnr = currbufnr + 1
-    endwhile
+    " call setbufline(bufnr, nummatches, "BUFFERS")
+    " let nummatches = nummatches + 1
+    " while currbufnr <= bufcount
+    "     if(bufexists(currbufnr))
+    "       let currbufname = expand('#'.currbufnr.':p') 
+    "       if(match(currbufname, pwd) > -1)
+    "         let bufname = currbufnr . ": ".expand('#'.currbufnr.':p:.')
+    "         call setbufline(bufnr,nummatches,bufname)
+    "         let nummatches += 1
+    "       endif
+    "     endif
+    "     let currbufnr = currbufnr + 1
+    " endwhile
     " set header lrc
     call setbufline(bufnr, nummatches, "LRC")
     let nummatches += 1
