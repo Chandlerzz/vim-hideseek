@@ -11,7 +11,7 @@ endif
 let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
-     autocmd bufEnter,tabEnter * call BufferRead()
+     autocmd bufEnter,tabEnter,DirChanged * call BufferRead()
 augroup END
 
 function! OpenBufferList()
