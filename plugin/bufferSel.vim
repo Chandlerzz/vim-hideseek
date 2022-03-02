@@ -11,7 +11,9 @@ endif
 let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
-     autocmd bufEnter,tabEnter,DirChanged * call BufferRead()
+     autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
+     autocmd DirChanged * OpenBufferList | OpenBufferList
+     autocmd VimEnter * OpenBufferList 
 augroup END
 
 function! OpenBufferList()
@@ -26,7 +28,13 @@ function! OpenBufferList()
         redraw
       endif
     endfor
+    execute "NERDTree"
   else
+    try
+      execute "NERDTreeClose"
+    catch /^Vim\%((\a\+)\)\=:E/
+    endtry
+    
     execute "vert topleft sbuffer ".bufnr." \| vert resize 40"
     setlocal nonumber norelativenumber buftype=nofile bufhidden=hide nobuflisted noswapfile wrap
     \ modifiable statusline=>\ Buffers nocursorline nofoldenable
@@ -141,3 +149,4 @@ function s:clearAllLines(bufnr,linenr)
 endfunction
 
 
+command! -bar -nargs=0 OpenBufferList :call OpenBufferList()  
