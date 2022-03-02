@@ -12,7 +12,7 @@ let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
      autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
-     autocmd DirChanged * OpenBufferList | OpenBufferList
+     autocmd DirChanged * OpenBufferList | OpenBufferList  
      autocmd VimEnter * OpenBufferList 
 augroup END
 
