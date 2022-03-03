@@ -24,11 +24,15 @@ function! OpenBufferList()
   if len(filterbuffers) == 1
     for i in range(winnr('$')+1)
       if winbufnr(i) == bufnr
-        execute i."windo buffer NERD"
+        try
+          execute i."windo buffer NERD"
+        catch /^Vim\%((\a\+)\)\=:E/
+          execute i."wincmd c"
+          execute "NERDTree"
+        endtry
         redraw
       endif
     endfor
-    " execute "NERDTree"
   else
     try
       execute "NERDTreeClose"
