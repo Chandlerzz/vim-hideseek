@@ -24,18 +24,18 @@ function! OpenBufferList()
   if len(filterbuffers) == 1
     for i in range(winnr('$')+1)
       if winbufnr(i) == bufnr
-        execute i."wincmd c"
+        execute i."windo buffer NERD"
         redraw
       endif
     endfor
-    execute "NERDTree"
+    " execute "NERDTree"
   else
     try
       execute "NERDTreeClose"
     catch /^Vim\%((\a\+)\)\=:E/
     endtry
     
-    execute "vert topleft sbuffer ".bufnr." \| vert resize 40"
+    execute "vert topleft sbuffer ".bufnr." \| vert resize 32"
     setlocal nonumber norelativenumber buftype=nofile bufhidden=hide nobuflisted noswapfile wrap
     \ modifiable statusline=>\ Buffers nocursorline nofoldenable
     setlocal filetype=hideseek
