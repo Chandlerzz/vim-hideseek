@@ -12,9 +12,18 @@ let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
      autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
-     autocmd DirChanged * OpenBufferList | OpenBufferList  
+     autocmd DirChanged * call Test1()
      autocmd VimEnter * OpenBufferList 
 augroup END
+
+function Test1()
+  for i in tabpagebuflist()
+    if (bufname(i) =~ "NERD")
+      execute "NERDTreeClose"
+      execute "NERDTreeCWD"
+    endif
+  endfor
+endfunction
 
 function! OpenBufferList()
   let activebuffers = tabpagebuflist()
@@ -26,6 +35,7 @@ function! OpenBufferList()
       if winbufnr(i) == bufnr
         try
           execute i."windo buffer NERD"
+          execute "NERDTreeCWD"
         catch /^Vim\%((\a\+)\)\=:E/
           execute i."wincmd c"
           execute "NERDTree"
