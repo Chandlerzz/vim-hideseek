@@ -12,11 +12,11 @@ let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
      autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
-     autocmd DirChanged * call Test1()
+     autocmd DirChanged * call NERDTreeCWD1()
      autocmd VimEnter * OpenBufferList 
 augroup END
 
-function Test1()
+function NERDTreeCWD1()
   for i in tabpagebuflist()
     if (bufname(i) =~ "NERD")
       execute "NERDTreeClose"
