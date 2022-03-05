@@ -2,7 +2,7 @@
 nnoremap ee :call SelectBuffer("")<cr>
 nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap ed :call SelectBuffer("delete")<cr>
-nnoremap <leader>e :call OpenBufferList()<cr>
+nnoremap <leader>n :call OpenBufferList()<cr>
 if has('nvim')
   let s:bufname = "/tmp/bufferList/".luaeval('math.random(1000000,1000000000)').".hideseek"
 else 
