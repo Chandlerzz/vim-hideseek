@@ -106,6 +106,7 @@ function SelectBuffer(type) abort
         silent exe 'vsp ' ..lrcline 
     endif
   elseif (a:type == "delete")
+    let head = s:mlrclines[head-1]
     call system("inoswp -s ".head)
     call BufferRead()
   else
