@@ -3,6 +3,8 @@ nnoremap ee :call SelectBuffer("")<cr>
 nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>n :call OpenBufferList()<cr>
+" matched lrc lines
+let s:mlrclines = []
 if has('nvim')
   let s:bufname = "/tmp/bufferList/".luaeval('math.random(1000000,1000000000)').".hideseek"
 else 
@@ -62,6 +64,7 @@ function! LRCread()
 endfunction
 
 function! BufferRead()
+    let s:mlrclines = []
     let pwd= getcwd()
     let bufnr = bufadd(s:bufname)
     call bufload(bufnr)
@@ -70,31 +73,16 @@ function! BufferRead()
     let bufcount = bufnr("$")
     let currbufnr = 1
     let nummatches = 1
-    " set header buffers 
-    " call setbufline(bufnr, nummatches, "BUFFERS")
-    " let nummatches = nummatches + 1
-    " while currbufnr <= bufcount
-    "     if(bufexists(currbufnr))
-    "       let currbufname = expand('#'.currbufnr.':p') 
-    "       if(match(currbufname, pwd) > -1)
-    "         let bufname = currbufnr . ": ".expand('#'.currbufnr.':p:.')
-    "         call setbufline(bufnr,nummatches,bufname)
-    "         let nummatches += 1
-    "       endif
-    "     endif
-    "     let currbufnr = currbufnr + 1
-    " endwhile
-    " set header lrc
     call setbufline(bufnr, nummatches, "LRC")
     let nummatches += 1
-    let lrclines = system("cat ".s:lrcname)
-    let lrclines = split(lrclines,"\n")
+    let lrclines = systemlist("cat ".s:lrcname)
     for index in range(len(lrclines)) 
       let lrcline = lrclines[index]
       if(match(lrcline, pwd) > -1)
         let lrcline = split(lrcline,"%")[0]
+        call add(s:mlrclines, index+1)
         let lrcline = substitute(lrcline,pwd,"","")
-        let lrcline = (index+1).": ".lrcline
+        let lrcline = len(s:mlrclines).": ".lrcline
         call setbufline(bufnr,nummatches,lrcline)
         let nummatches += 1
       endif
@@ -107,8 +95,8 @@ function SelectBuffer(type) abort
   let head=charr[:-2]
   let tail=charr[-1:-1]
   if (a:type == "lrc")
-    let lrclines = system("cat ".s:lrcname)
-    let lrclines = split(lrclines,"\n")
+    let lrclines = systemlist("cat ".s:lrcname)
+    let head = s:mlrclines[head-1]
     let lrcline = lrclines[head-1]
     let lrcline = split(lrcline,"%")[0]
     let g:lrcline = lrcline
