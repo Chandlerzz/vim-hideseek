@@ -73,7 +73,9 @@ function! BufferRead()
     let bufcount = bufnr("$")
     let currbufnr = 1
     let nummatches = 1
-    call setbufline(bufnr, nummatches, "LRC")
+    call setbufline(bufnr, nummatches, "MRU:")
+    let nummatches += 1
+    call setbufline(bufnr, nummatches, "path:".pwd)
     let nummatches += 1
     let lrclines = systemlist("cat ".s:lrcname)
     for index in range(len(lrclines)) 
@@ -126,7 +128,12 @@ function! s:getchar()
   return c
 endfunction
 function! s:inputtarget()
+  let bufnr = bufnr(s:bufname)
   let c = s:getchar()
+    call setbufvar(bufnr, "&syntax","off")
+    call setbufvar(bufnr, "&syntax","on")
+    execute 'windo syntax region hideseekSelected start=/\%'.(c+2).'l\%5c/ end=/$/'
+    redraw
   while c =~ '^\d\+$'
     let c .= s:getchar()
   endwhile

@@ -171,10 +171,8 @@ function! hideseek#seek()
 
     let rest = ''
     while 1
-      let g:buffers = s:buffers
       if has_key(s:buffers, tolower(bufnum))
         let line = s:buffers[tolower(bufnum)]
-        let g:line = line
         setlocal syntax=off
         setlocal syntax=on
         execute line
