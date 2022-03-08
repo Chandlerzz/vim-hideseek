@@ -6,17 +6,13 @@ nnoremap <leader>n :call OpenBufferList()<cr>
 " matched lrc lines
 let s:mlrclines = []
 let s:pwd = getcwd()
-if has('nvim')
-  let s:bufname = "/tmp/bufferList/".luaeval('math.random(1000000,1000000000)').".hideseek"
-else 
-  let s:bufname = "/tmp/bufferList/".rand().".hideseek"
-endif
+let s:bufname = "/tmp/hideseek.hideseek"
 let s:lrcname = expand("~/.lrc")
 augroup bufferSel
     au!
+     autocmd VimEnter * OpenBufferList 
      autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
      autocmd DirChanged * call NERDTreeCWD1()
-     autocmd VimEnter * OpenBufferList 
 augroup END
 
 function NERDTreeCWD1()
@@ -54,8 +50,7 @@ function! OpenBufferList()
     
     execute "vert topleft sbuffer ".bufnr." \| vert resize 32"
     setlocal nonumber norelativenumber buftype=nofile bufhidden=hide nobuflisted noswapfile wrap
-    \ modifiable statusline=>\ Buffers nocursorline nofoldenable
-    call setbufvar(bufnr,"&statusline",s:pwd)
+    \ modifiable  nocursorline nofoldenable
     setlocal filetype=hideseek
     execute "wincmd p"
   endif
@@ -69,8 +64,6 @@ function! BufferRead()
     call setbufvar(bufnr,"&statusline",s:pwd)
     let linenr = len(getbufline(bufnr,1,'$'))
     call s:clearAllLines(bufnr,linenr)
-    let bufcount = bufnr("$")
-    let currbufnr = 1
     let nummatches = 1
     call setbufline(bufnr, nummatches, "MRU:")
     let nummatches += 1
