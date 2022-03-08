@@ -3,16 +3,16 @@ nnoremap ee :call SelectBuffer("")<cr>
 nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>n :call OpenBufferList()<cr>
-" matched lrc lines
-let s:mlrclines = []
+" matched lines
+let s:mlines = []
 let s:pwd = getcwd()
 let s:bufname = "/tmp/hideseek.hideseek"
 let s:lrcname = expand("~/.lrc")
 augroup bufferSel
-    au!
-     autocmd VimEnter * OpenBufferList 
-     autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
-     autocmd DirChanged * call NERDTreeCWD1()
+  au!
+  autocmd VimEnter * OpenBufferList 
+  autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
+  autocmd DirChanged * call NERDTreeCWD1()
 augroup END
 
 function NERDTreeCWD1()
@@ -47,38 +47,40 @@ function! OpenBufferList()
       execute "NERDTreeClose"
     catch /^Vim\%((\a\+)\)\=:E/
     endtry
-    
+
     execute "vert topleft sbuffer ".bufnr." \| vert resize 32"
     setlocal nonumber norelativenumber buftype=nofile bufhidden=hide nobuflisted noswapfile wrap
-    \ modifiable  nocursorline nofoldenable
+          \ modifiable  nocursorline nofoldenable
     setlocal filetype=hideseek
     execute "wincmd p"
   endif
 endfunction
 
 function! BufferRead()
-    let s:mlrclines = []
-    let s:pwd= getcwd()
-    let bufnr = bufadd(s:bufname)
-    call bufload(bufnr)
-    call setbufvar(bufnr,"&statusline",s:pwd)
-    let linenr = len(getbufline(bufnr,1,'$'))
-    call s:clearAllLines(bufnr,linenr)
-    let nummatches = 1
-    call setbufline(bufnr, nummatches, "MRU:")
-    let nummatches += 1
-    let lrclines = systemlist("cat ".s:lrcname)
-    for index in range(len(lrclines)) 
-      let lrcline = lrclines[index]
-      if(match(lrcline, s:pwd) > -1)
-        let lrcline = split(lrcline,"%")[0]
-        call add(s:mlrclines, index+1)
-        let lrcline = substitute(lrcline,s:pwd,"","")
-        let lrcline = len(s:mlrclines).": ".lrcline
-        call setbufline(bufnr,nummatches,lrcline)
-        let nummatches += 1
+  let s:mlines = []
+  let s:pwd= getcwd()
+  let bufnr = bufadd(s:bufname)
+  call bufload(bufnr)
+  call setbufvar(bufnr,"&statusline",s:pwd)
+  let linenr = len(getbufline(bufnr,0,'$'))
+  call s:clearAllLines(bufnr,linenr)
+  let linenr = s:getbufnr(bufnr)
+  call appendbufline(bufnr, linenr, "MRU:")
+  let lrclines = systemlist("cat ".s:lrcname)
+  for index in range(len(lrclines)) 
+    let lrcline = lrclines[index]
+    if(match(lrcline, s:pwd) > -1)
+      let linenr = s:getbufnr(bufnr)
+      call add(s:mlines, index+1)
+      let lrcline = split(lrcline,"%")[0]
+      let lrcline = substitute(lrcline,s:pwd,"","")
+      let lrcline = len(s:mlines).": ".lrcline
+      call appendbufline(bufnr,linenr,lrcline)
+      if(len(s:mlines) == 9)
+       break 
       endif
-    endfor
+    endif
+  endfor
 endfunction
 
 
@@ -88,24 +90,24 @@ function SelectBuffer(type) abort
   let tail=charr[-1:-1]
   if (a:type == "lrc")
     let lrclines = systemlist("cat ".s:lrcname)
-    let head = s:mlrclines[head-1]
+    let head = s:mlines[head-1]
     let lrcline = lrclines[head-1]
     let lrcline = split(lrcline,"%")[0]
     let g:lrcline = lrcline
     if tail =~ "e"
-        silent exe 'e ' ..lrcline 
+      silent exe 'e ' ..lrcline 
     else
-        silent exe 'vsp ' ..lrcline 
+      silent exe 'vsp ' ..lrcline 
     endif
   elseif (a:type == "delete")
-    let head = s:mlrclines[head-1]
+    let head = s:mlines[head-1]
     call system("inoswp -s ".head)
     call BufferRead()
   else
     if tail =~ "e"
-        silent exe 'e #' ..head 
+      silent exe 'e #' ..head 
     else
-        silent exe 'vsp #' ..head 
+      silent exe 'vsp #' ..head 
     endif
   endif
 endfunction
@@ -120,10 +122,10 @@ endfunction
 function! s:inputtarget()
   let bufnr = bufnr(s:bufname)
   let c = s:getchar()
-    call setbufvar(bufnr, "&syntax","off")
-    call setbufvar(bufnr, "&syntax","on")
-    execute 'windo syntax region hideseekSelected start=/\%'.(c+1).'l\%5c/ end=/$/'
-    redraw
+  call setbufvar(bufnr, "&syntax","off")
+  call setbufvar(bufnr, "&syntax","on")
+  execute 'windo syntax region hideseekSelected start=/\%'.(c+1).'l\%5c/ end=/$/'
+  redraw
   while c =~ '^\d\+$'
     let c .= s:getchar()
   endwhile
@@ -143,9 +145,13 @@ function s:clearAllLines(bufnr,linenr)
   if (linenr == 0 )
     return 0
   endif
-  call setbufline(bufnr,linenr,"")
+  call deletebufline(bufnr,linenr)
   let linenr = linenr - 1
   return  s:clearAllLines(bufnr,linenr)
+endfunction
+
+function s:getbufnr(bufnr)
+  return len(getbufline(a:bufnr,0,'$')) -1
 endfunction
 
 
