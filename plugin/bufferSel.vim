@@ -5,6 +5,7 @@ nnoremap ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>n :call OpenBufferList()<cr>
 " matched lrc lines
 let s:mlrclines = []
+let s:pwd = getcwd()
 if has('nvim')
   let s:bufname = "/tmp/bufferList/".luaeval('math.random(1000000,1000000000)').".hideseek"
 else 
@@ -54,20 +55,18 @@ function! OpenBufferList()
     execute "vert topleft sbuffer ".bufnr." \| vert resize 32"
     setlocal nonumber norelativenumber buftype=nofile bufhidden=hide nobuflisted noswapfile wrap
     \ modifiable statusline=>\ Buffers nocursorline nofoldenable
+    call setbufvar(bufnr,"&statusline",s:pwd)
     setlocal filetype=hideseek
     execute "wincmd p"
   endif
 endfunction
 
-function! LRCread()
-    let pwd= getcwd()
-endfunction
-
 function! BufferRead()
     let s:mlrclines = []
-    let pwd= getcwd()
+    let s:pwd= getcwd()
     let bufnr = bufadd(s:bufname)
     call bufload(bufnr)
+    call setbufvar(bufnr,"&statusline",s:pwd)
     let linenr = len(getbufline(bufnr,1,'$'))
     call s:clearAllLines(bufnr,linenr)
     let bufcount = bufnr("$")
@@ -75,15 +74,13 @@ function! BufferRead()
     let nummatches = 1
     call setbufline(bufnr, nummatches, "MRU:")
     let nummatches += 1
-    call setbufline(bufnr, nummatches, "path:".pwd)
-    let nummatches += 1
     let lrclines = systemlist("cat ".s:lrcname)
     for index in range(len(lrclines)) 
       let lrcline = lrclines[index]
-      if(match(lrcline, pwd) > -1)
+      if(match(lrcline, s:pwd) > -1)
         let lrcline = split(lrcline,"%")[0]
         call add(s:mlrclines, index+1)
-        let lrcline = substitute(lrcline,pwd,"","")
+        let lrcline = substitute(lrcline,s:pwd,"","")
         let lrcline = len(s:mlrclines).": ".lrcline
         call setbufline(bufnr,nummatches,lrcline)
         let nummatches += 1
@@ -132,7 +129,7 @@ function! s:inputtarget()
   let c = s:getchar()
     call setbufvar(bufnr, "&syntax","off")
     call setbufvar(bufnr, "&syntax","on")
-    execute 'windo syntax region hideseekSelected start=/\%'.(c+2).'l\%5c/ end=/$/'
+    execute 'windo syntax region hideseekSelected start=/\%'.(c+1).'l\%5c/ end=/$/'
     redraw
   while c =~ '^\d\+$'
     let c .= s:getchar()
