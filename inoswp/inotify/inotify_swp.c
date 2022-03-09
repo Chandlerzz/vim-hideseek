@@ -409,11 +409,6 @@ int main(int argc,char **argv)
     if (sigprocmask(SIG_BLOCK, &blockMask, NULL) == -1)
         errExit("sigprocmask");
 
-    /* sigemptyset(&sa.sa_mask); */
-    /* sa.sa_flags = 0; */
-    /* sa.sa_handler = handler; */
-    /* if (sigaction(NOTIFY_SIG, &sa, NULL) == -1) */
-    /*     errExit("sigaction"); */
     SIGACTION(NOTIFY_SIG, handler);
 
     /* Register for message notification via a signal */
@@ -448,11 +443,6 @@ int main(int argc,char **argv)
 
 
   default:    /* Parent: can see file changes made by child */
-    /* sigemptyset(&sa.sa_mask); */
-    /* sa.sa_flags = 0; */
-    /* sa.sa_handler = handler_shm; */
-    /* if (sigaction(NOTIFY_SIG_SHM, &sa, NULL) == -1) */
-    /*   errExit("sigaction"); */
     SIGACTION(NOTIFY_SIG_SHM, handler_shm);
     inotifyFd = inotify_init();
     if(inotifyFd == -1)

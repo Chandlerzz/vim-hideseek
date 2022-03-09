@@ -57,6 +57,7 @@ function! OpenBufferList()
 endfunction
 
 function! BufferRead()
+  let oldlines = copy(s:mlines)
   let s:mlines = []
   let s:pwd= getcwd()
   let bufnr = bufadd(s:bufname)
@@ -71,8 +72,8 @@ function! BufferRead()
     let lrcline = lrclines[index]
     if(match(lrcline, s:pwd) > -1)
       let linenr = s:getbufnr(bufnr)
-      call add(s:mlines, index+1)
       let lrcline = split(lrcline,"%")[0]
+      call add(s:mlines, {'num':index+1,'path':lrcline})
       let lrcline = substitute(lrcline,s:pwd,"","")
       let lrcline = len(s:mlines).": ".lrcline
       call appendbufline(bufnr,linenr,lrcline)
@@ -81,6 +82,13 @@ function! BufferRead()
       endif
     endif
   endfor
+  if (len(oldlines) > 0)
+    if(len(s:mlines) > 0)
+      if(oldlines[0]['path'] != s:mlines[0]['path'])
+        call s:setcurrbufhl(bufnr,1)
+      endif
+    endif
+  endif
 endfunction
 
 
@@ -89,18 +97,14 @@ function SelectBuffer(type) abort
   let head=charr[:-2]
   let tail=charr[-1:-1]
   if (a:type == "lrc")
-    let lrclines = systemlist("cat ".s:lrcname)
-    let head = s:mlines[head-1]
-    let lrcline = lrclines[head-1]
-    let lrcline = split(lrcline,"%")[0]
-    let g:lrcline = lrcline
+    let lrcline = s:mlines[head-1]['path']
     if tail =~ "e"
       silent exe 'e ' ..lrcline 
     else
       silent exe 'vsp ' ..lrcline 
     endif
   elseif (a:type == "delete")
-    let head = s:mlines[head-1]
+    let head = s:mlines[head-1]['num']
     call system("inoswp -s ".head)
     call BufferRead()
   else
@@ -122,12 +126,9 @@ endfunction
 function! s:inputtarget()
   let bufnr = bufnr(s:bufname)
   let c = s:getchar()
-  call setbufvar(bufnr, "&syntax","off")
-  call setbufvar(bufnr, "&syntax","on")
-  execute 'windo syntax region hideseekSelected start=/\%'.(c+1).'l\%5c/ end=/$/'
-  redraw
   while c =~ '^\d\+$'
     let c .= s:getchar()
+    call s:setcurrbufhl(bufnr,c)
   endwhile
   if c == " "
     let c .= s:getchar()
@@ -152,6 +153,13 @@ endfunction
 
 function s:getbufnr(bufnr)
   return len(getbufline(a:bufnr,0,'$')) -1
+endfunction
+
+function s:setcurrbufhl(bufnr, line)
+  call setbufvar(a:bufnr, "&syntax","off")
+  call setbufvar(a:bufnr, "&syntax","on")
+  execute 'windo syntax region hideseekSelected start=/\%'.(a:line+1).'l\%5c/ end=/$/'
+  redraw
 endfunction
 
 
