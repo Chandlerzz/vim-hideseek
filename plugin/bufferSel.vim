@@ -85,7 +85,12 @@ function! BufferRead()
   if (len(oldlines) > 0)
     if(len(s:mlines) > 0)
       if(oldlines[0]['path'] != s:mlines[0]['path'])
-        call s:setcurrbufhl(bufnr,1)
+        if(expand("%:p") == s:mlines[0]['path'])
+          call s:setcurrbufhl(bufnr,1)
+        else
+          call setbufvar(bufnr, "&syntax","off")
+          call setbufvar(bufnr, "&syntax","on")
+        endif
       endif
     endif
   endif
@@ -105,6 +110,7 @@ function SelectBuffer(type) abort
     endif
   elseif (a:type == "delete")
     let head = s:mlines[head-1]['num']
+    let g:test = head
     call system("inoswp -s ".head)
     call BufferRead()
   else
