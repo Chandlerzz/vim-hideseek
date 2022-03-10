@@ -112,6 +112,7 @@ function SelectBuffer(type) abort
     let head = s:mlines[head-1]['num']
     let g:test = head
     call system("inoswp -s ".head)
+    execute "sleep"
     call BufferRead()
   else
     if tail =~ "e"
