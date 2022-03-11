@@ -14,13 +14,13 @@
 #include <stdio.h>
 
 
-void run_table_script(void);
-void run_table_script()
+void run_table_script(char *s);
+void run_table_script(char *s)
 {
-    int status, result, i;
+    int status, result ;
     double sum;
     lua_State *L;
-    int cvals[] = {0, 11, 13, 17, 19, 23, 29, 31, 37};
+    /* int cvals[] = {0, 11, 13, 17, 19, 23, 29, 31, 37}; */
 
     printf("[info] %s...\n", __func__);
     /*
@@ -63,11 +63,11 @@ void run_table_script()
      * top of the stack.
      */
 
-    for (i = 1; i <= 5; i++) {
-        lua_pushnumber(L, i);   /* Push the table index */
-        lua_pushnumber(L, cvals[i]); /* Push the cell value */
+    /* for (i = 1; i <= 5; i++) { */
+        lua_pushnumber(L, 1);   /* Push the table index */
+        lua_pushstring(L, s); /* Push the cell value */
         lua_rawset(L, -3);      /* Stores the pair in the table */
-    }
+    /* } */
 
     /* By what name is the script going to reference our table? */
     lua_setglobal(L, "foo");
@@ -80,7 +80,7 @@ void run_table_script()
     }
 
     /* Get the returned value at the top of the stack (index -1) */
-    sum = lua_tonumber(L, -1);
+    const char *sum1 = lua_tostring(L, -1);
 
     printf("Script returned: %.0f\n", sum);
 

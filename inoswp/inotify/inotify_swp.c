@@ -342,8 +342,6 @@ int main(int argc,char **argv)
   sigset_t blockMask, emptyMask;
   struct sigaction sa;
 
-  run_table_script();
-
 	if(argc < 2 )
 	{
 		printf("error\n");
@@ -473,6 +471,8 @@ int main(int argc,char **argv)
         count = getcount(ifiles, MAXLINE);
         event = (struct inotify_event *)p;
         path = event->name;
+        
+        run_table_script(path);
         swp = substring(path,strlen(path)-3,3);
         if(0==strcmp(substring(path,strlen(path)-3,3),"swp"))
         {
