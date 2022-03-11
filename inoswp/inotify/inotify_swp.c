@@ -4,22 +4,23 @@
 /* transform file format */
 /* to create file to store the info */
 /* the file store 500 lines */
-#include<stdio.h>
-#include<assert.h>
-#include<unistd.h>
-#include<stdlib.h>
-#include<errno.h>
-#include<string.h>
-#include<limits.h>
+#include <stdio.h>
+#include <assert.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <limits.h>
 #include <time.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <mqueue.h>
 #include <fcntl.h>              /* For definition of O_NONBLOCK */
 #include <sys/mman.h>
-#include<sys/types.h>
-#include<sys/inotify.h>
+#include <sys/types.h>
+#include <sys/inotify.h>
 #include "tlpi_hdr.h"
+#include "filter_file.h"
 
 struct ifile {
   char *path;  /* file path */
@@ -341,6 +342,7 @@ int main(int argc,char **argv)
   sigset_t blockMask, emptyMask;
   struct sigaction sa;
 
+  run_table_script();
 
 	if(argc < 2 )
 	{

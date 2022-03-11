@@ -1,7 +1,10 @@
 " bufferSel
+" TODO
 " 当前文件在左侧树节点中显示高亮
 " 如果当前文件在列表中则，选择当前文将相同文件名显示高亮，如果不再，则不显示
 " 当路径深度大于三时，路径分类成两部分，前面为跟节点，后面为节点，相同根节点的合并到同一根节点下面额定
+" TODO
+" 学习c调用lua 将路径过滤功能放到lua中去做，做到过滤条件可配置
 " nnoremap ee :call SelectBuffer("")<cr>
 nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap ed :call SelectBuffer("delete")<cr>
