@@ -12,13 +12,18 @@
 #include <lauxlib.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
-void run_table_script(char *s);
-void run_table_script(char *s)
+void run_table_script(char *s, char *fullpath);
+void run_table_script(char *s, char *fullpath)
 {
     int status, result ;
     double sum;
+    char filepath[100];
+    memset(filepath, '\0', 100);
+    strcat(filepath,getenv("HOME"));
+    strcat(filepath,"/.vim/bundle/vim-hideseek/inoswp/inotify/script.lua");
     lua_State *L;
     /* int cvals[] = {0, 11, 13, 17, 19, 23, 29, 31, 37}; */
 
@@ -32,7 +37,7 @@ void run_table_script(char *s)
     luaL_openlibs(L); /* Load Lua libraries */
 
     /* Load the file containing the script we are going to run */
-    status = luaL_loadfile(L, "script.lua");
+    status = luaL_loadfile(L,filepath);
     if (status) {
         /* If something went wrong, error message is at the top of */
         /* the stack */
@@ -80,11 +85,14 @@ void run_table_script(char *s)
     }
 
     /* Get the returned value at the top of the stack (index -1) */
-    const char *sum1 = lua_tostring(L, -1);
+    const char *tmp = lua_tostring(L, -1);
+    strcpy(fullpath,tmp);
+    printf("%s",fullpath);
 
     printf("Script returned: %.0f\n", sum);
 
     lua_pop(L, 1);  /* Take the returned value out of the stack */
     lua_close(L);   /* Cya, Lua */
+    
 }
 

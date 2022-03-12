@@ -324,9 +324,6 @@ int main(int argc,char **argv)
 	ssize_t numRead;
 	char *p;
   char *path;
-  char *fullpath;
-  char *hideseek;
-  char *swp;
   char mode;
   int opt;
   char *message;
@@ -472,58 +469,44 @@ int main(int argc,char **argv)
         event = (struct inotify_event *)p;
         path = event->name;
         
-        run_table_script(path);
-        swp = substring(path,strlen(path)-3,3);
-        if(0==strcmp(substring(path,strlen(path)-3,3),"swp"))
+        char fullpath1[100]={'\0'};
+        run_table_script(path,fullpath1);
+        if(fullpath1[0] == '\0')
         {
-          fullpath = getFPath(path);
-          flag = isInIfiles(fullpath,ifiles,count);
-          /* get the end 8 character of fullpath. if it is "hideseek" ignore it*/ 
-          hideseek = substring(fullpath,strlen(fullpath)-8,8);
-          if(0==strcmp(hideseek,"hideseek"))
+          printf("fullpath is empty\n");
+          p+=sizeof(struct inotify_event) + event->len;
+          continue;
+        }
+        flag = isInIfiles(fullpath1,ifiles,count);
+        if(!flag)
+        {
+          struct ifile *ifil =  createifile(fullpath1);
+          if (count == MAXLINE)
           {
-            p+=sizeof(struct inotify_event) + event->len;
-            continue;
-          }
-          if(strstr(fullpath,"NERD_tree"))
-          {
-            p+=sizeof(struct inotify_event) + event->len;
-            continue;
-          }
-          if(!flag)
-          {
-            struct ifile *ifil =  createifile(fullpath);
-            if (count == MAXLINE)
-            {
-              count =count-1;
-              free(ifiles[count]);
-            }else{
-              count = count;
-            }
-            MOVEBACK(i,count);
-            ifiles[0] = ifil;
+            count =count-1;
+            free(ifiles[count]);
           }else{
-            for (int i = 0; i < count; ++i) 
+            count = count;
+          }
+          MOVEBACK(i,count);
+          ifiles[0] = ifil;
+        }else{
+          for (int i = 0; i < count; ++i) 
+          {
+            if(!strcmp(ifiles[i]->path,fullpath1))
             {
-              if(!strcmp(ifiles[i]->path,fullpath))
-              {
-              struct ifile *tmp = ifiles[i]; 
-              for (int j = i;  j > 0; --j) {
-               ifiles[j] = ifiles[j-1]; 
-              }
-              ifiles[0] = tmp;
-               break;
-              } 
+            struct ifile *tmp = ifiles[i]; 
+            for (int j = i;  j > 0; --j) {
+             ifiles[j] = ifiles[j-1]; 
             }
+            ifiles[0] = tmp;
+             break;
+            } 
           }
         }
-          free(hideseek); hideseek=NULL;
-          free(fullpath); fullpath=NULL;
-          free(swp);      swp=NULL;
-          p+=sizeof(struct inotify_event) + event->len;
+        p+=sizeof(struct inotify_event) + event->len;
+        write2file();
       }
-
-      write2file();
     }
     if (wait(NULL) == -1)
         errExit("wait");                /* Wait for child exit */

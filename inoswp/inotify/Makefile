@@ -19,7 +19,7 @@ inoswp:
 		-I$(LUADIR) \
 		-pedantic -Wall -W -Wmissing-prototypes \
 		-Wno-sign-compare -Wimplicit-fallthrough -Wno-unused-parameter \
-		inotify_swp.c filter_file.c ../libtlpi.a -llua5.4 -lrt -o $(TARGET)
+		inotify_swp.c filter_file.c ../libtlpi.a -llua -lrt -o $(TARGET)
 
 clean:
 	rm ~/bin/inoswp
