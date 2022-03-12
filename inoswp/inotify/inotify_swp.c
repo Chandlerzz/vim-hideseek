@@ -339,6 +339,10 @@ int main(int argc,char **argv)
   sigset_t blockMask, emptyMask;
   struct sigaction sa;
 
+  char fullpath1[100];
+  run_table_script("123.swp",fullpath1);
+  printf("123%s",fullpath1);
+  return 0;
 	if(argc < 2 )
 	{
 		printf("error\n");
