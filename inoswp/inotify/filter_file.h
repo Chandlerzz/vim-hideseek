@@ -1,2 +1,2 @@
 
-void run_table_script(char *s);
+void run_table_script(char *s,char *fullpath);

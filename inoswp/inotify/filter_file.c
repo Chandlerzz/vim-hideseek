@@ -12,10 +12,11 @@
 #include <lauxlib.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
-void run_table_script(char *s);
-void run_table_script(char *s)
+void run_table_script(char *s, char *fullpath);
+void run_table_script(char *s, char *fullpath)
 {
     int status, result ;
     double sum;
@@ -80,11 +81,14 @@ void run_table_script(char *s)
     }
 
     /* Get the returned value at the top of the stack (index -1) */
-    const char *sum1 = lua_tostring(L, -1);
+    const char *tmp = lua_tostring(L, -1);
+    strcpy(fullpath,tmp);
+    printf("%s",fullpath);
 
     printf("Script returned: %.0f\n", sum);
 
     lua_pop(L, 1);  /* Take the returned value out of the stack */
     lua_close(L);   /* Cya, Lua */
+    
 }
 

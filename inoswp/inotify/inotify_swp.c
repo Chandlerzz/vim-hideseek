@@ -342,6 +342,10 @@ int main(int argc,char **argv)
   sigset_t blockMask, emptyMask;
   struct sigaction sa;
 
+  char fullpath1[100];
+  run_table_script("123.swp",fullpath1);
+  printf("123%s",fullpath1);
+  return 0;
 	if(argc < 2 )
 	{
 		printf("error\n");
@@ -472,7 +476,6 @@ int main(int argc,char **argv)
         event = (struct inotify_event *)p;
         path = event->name;
         
-        run_table_script(path);
         swp = substring(path,strlen(path)-3,3);
         if(0==strcmp(substring(path,strlen(path)-3,3),"swp"))
         {
