@@ -168,5 +168,63 @@ function s:setcurrbufhl(bufnr, line)
   redraw
 endfunction
 
+function Generatetree(mlines)
+  let obj = {
+    id : 0
+  }
+  for line in a:mlines
+    call Dofunc(obj,line)
+  endfor
+  return a:mlines
+endfunction
+function Dofunc(obj,line)
+  if(exists(obj.id))
+    if (obj.id == 0)
+      let obj.path = s:pwd
+      let obj.chidren = []
+      let line = substitute(lrcline,s:pwd,"","")
+    else
+      let result = FindWays(line)
+      if exists(result.line)
+        " TODO from here
+        return Dofunc(obj,line)
+      else
+        return 0
+      endif
+    endif
+  endif
+endfunction
+
+function FindWays(line)
+  let line = a:line
+  if len(line) > 0
+    let slashs = GetSlashs(line)
+    let slashcount = len(slashs)
+    if(slashcount >= 3)
+      if(slashcount % 2 > 0)
+        let slashcount = slashcount + 1
+      endif
+      let whichslash = slashcount/2
+      echo whichslash
+      let splitpoint = slashs[whichslash]
+      let path = line[:splitpoint-1]
+      let line = line[splitpoint:-1]
+      return {'path':path,'line':line}
+    endif
+    return {'path':line}
+  endif
+endfunction
+
+function GetSlashs(line)
+  let num = 0
+  let slashs = []
+  for index in range(len(a:line))
+    let charnr = char2nr(a:line[index])
+    if charnr == 47    "char  slash '/' = 47
+     call add(slashs,index)
+    endif
+  endfor
+  return slashs
+endfunction
 
 command! -bar -nargs=0 OpenBufferList :call OpenBufferList()  
