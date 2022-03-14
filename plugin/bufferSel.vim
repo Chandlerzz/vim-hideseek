@@ -221,6 +221,7 @@ function Dofunc(obj,line)
   else
     let newobj ={}
     let newobj.path = result.path
+    echo obj
     call add(obj.children,newobj)
   endif
 endfunction
