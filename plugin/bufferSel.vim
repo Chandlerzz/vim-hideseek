@@ -1,6 +1,8 @@
 " bufferSel
-" TODO
-" 当路径深度大于三时，路径分类成两部分，前面为跟节点，后面为节点，相同根节点的合并到同一根节点下面额定
+" attention  
+" filter function will change the firser parameter. should copy it and pass it
+" exists function the parameter is String
+"
 " nnoremap ee :call SelectBuffer("")<cr>
 nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap ed :call SelectBuffer("delete")<cr>
@@ -86,6 +88,7 @@ function! BufferRead()
   endfor
   let currbuf = expand("%:p")
   let tmp = copy(s:mlines)
+  let g:mlines = s:mlines
   let tmp = filter(tmp,'v:val.path == currbuf')
   if(len(tmp) >=1)
     call s:setcurrbufhl(bufnr,tmp[0].index+1)
@@ -132,13 +135,12 @@ endfunction
 function! s:inputtarget()
   let bufnr = bufnr(s:bufname)
   let c = s:getchar()
+  " clear bufferSel augroup
   augroup bufferSel
     au!
-    autocmd VimEnter * OpenBufferList 
-    autocmd VimEnter,tabEnter,DirChanged * call BufferRead()
-    autocmd DirChanged * call NERDTreeCWD1()
   augroup END
   call s:setcurrbufhl(bufnr,c)
+  " set buffersel augroup
   augroup bufferSel
     au!
     autocmd VimEnter * OpenBufferList 
@@ -181,29 +183,45 @@ function s:setcurrbufhl(bufnr, line)
 endfunction
 
 function Generatetree(mlines)
-  let obj = {
-    id : 0
-  }
+  let obj = {}
+  let obj.id = 0
+  let obj.level = 1
+  let obj.children = []
   for line in a:mlines
-    call Dofunc(obj,line)
+    call Dofunc(obj,line.path)
   endfor
-  return a:mlines
+  return obj
 endfunction
+" TODO 行号需要节点绑定
 function Dofunc(obj,line)
-  if(exists(obj.id))
-    if (obj.id == 0)
-      let obj.path = s:pwd
-      let obj.chidren = []
-      let line = substitute(lrcline,s:pwd,"","")
+  let obj = a:obj
+  let line = a:line
+  if (obj.id == 0)
+    let obj.path = s:pwd
+    let line = substitute(line,s:pwd,"","")
+  endif
+  let result = FindWays(line)
+  if (obj.id != 0)
+    let newobj ={}
+    let newobj.path = line
+    call add(obj.children,newobj)
+  endif 
+  if exists('result.line')
+    let tmp = filter(copy(obj.children),"v:val.path == result.path")
+    if(len(tmp) == 1)
+      return Dofunc(tmp[0],result.line)
     else
-      let result = FindWays(line)
-      if exists(result.line)
-        " TODO from here
-        return Dofunc(obj,line)
-      else
-        return 0
-      endif
+      let newobj={}
+      let newobj.path = result.path
+      let newobj.children = []
+      let newobj.id = 1
+      call add(obj.children,newobj)
+      return Dofunc(newobj,result.line)
     endif
+  else
+    let newobj ={}
+    let newobj.path = result.path
+    call add(obj.children,newobj)
   endif
 endfunction
 
@@ -217,7 +235,6 @@ function FindWays(line)
         let slashcount = slashcount + 1
       endif
       let whichslash = slashcount/2
-      echo whichslash
       let splitpoint = slashs[whichslash]
       let path = line[:splitpoint-1]
       let line = line[splitpoint:-1]
