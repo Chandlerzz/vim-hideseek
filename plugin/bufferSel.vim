@@ -132,9 +132,21 @@ endfunction
 function! s:inputtarget()
   let bufnr = bufnr(s:bufname)
   let c = s:getchar()
+  augroup bufferSel
+    au!
+    autocmd VimEnter * OpenBufferList 
+    autocmd VimEnter,tabEnter,DirChanged * call BufferRead()
+    autocmd DirChanged * call NERDTreeCWD1()
+  augroup END
+  call s:setcurrbufhl(bufnr,c)
+  augroup bufferSel
+    au!
+    autocmd VimEnter * OpenBufferList 
+    autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
+    autocmd DirChanged * call NERDTreeCWD1()
+  augroup END
   while c =~ '^\d\+$'
     let c .= s:getchar()
-    call s:setcurrbufhl(bufnr,c)
   endwhile
   if c == " "
     let c .= s:getchar()
