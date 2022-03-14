@@ -327,6 +327,7 @@ int main(int argc,char **argv)
   char mode;
   int opt;
   char *message;
+  char fullpath1[200]={'\0'};
 	struct inotify_event *event;
   getfilepath();
   readsourcefile(ifiles);
@@ -339,10 +340,6 @@ int main(int argc,char **argv)
   sigset_t blockMask, emptyMask;
   struct sigaction sa;
 
-  char fullpath1[100];
-  run_table_script("123.swp",fullpath1);
-  printf("123%s",fullpath1);
-  return 0;
 	if(argc < 2 )
 	{
 		printf("error\n");
@@ -473,7 +470,6 @@ int main(int argc,char **argv)
         event = (struct inotify_event *)p;
         path = event->name;
         
-        char fullpath1[100]={'\0'};
         run_table_script(path,fullpath1);
         if(fullpath1[0] == '\0')
         {
