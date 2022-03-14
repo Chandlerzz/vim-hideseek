@@ -77,7 +77,7 @@ function! BufferRead()
     if(match(lrcline, s:pwd) > -1)
       let linenr = s:getbufnr(bufnr)
       let lrcline = split(lrcline,"%")[0]
-      call add(s:mlines, {'num':index+1,'path':lrcline,'index':len(s:mlines)})
+      call add(s:mlines, {'lrc_num':index+1,'path':lrcline,'index':len(s:mlines)})
       let lrcline = substitute(lrcline,s:pwd,"","")
       let lrcline = len(s:mlines).": ".lrcline
       call appendbufline(bufnr,linenr,lrcline)
@@ -86,9 +86,13 @@ function! BufferRead()
       endif
     endif
   endfor
+  let obj = Generatetree(deepcopy(s:mlines))
+  for line in obj['children']
+    let linenr = len(getbufline(bufnr,0,'$'))
+    call appendbufline(bufnr,linenr,line['path'])
+  endfor
   let currbuf = expand("%:p")
   let tmp = copy(s:mlines)
-  let g:mlines = s:mlines
   let tmp = filter(tmp,'v:val.path == currbuf')
   if(len(tmp) >=1)
     call s:setcurrbufhl(bufnr,tmp[0].index+1)
@@ -111,7 +115,7 @@ function SelectBuffer(type) abort
       silent exe 'vsp ' ..lrcline 
     endif
   elseif (a:type == "delete")
-    let head = s:mlines[head-1]['num']
+    let head = s:mlines[head-1]['lrc_num']
     let g:test = head
     call system("inoswp -s ".head)
     execute "sleep"
@@ -185,10 +189,9 @@ endfunction
 function Generatetree(mlines)
   let obj = {}
   let obj.id = 0
-  let obj.level = 1
   let obj.children = []
   for line in a:mlines
-    call Dofunc(obj,line.path)
+    call Dofunc(obj,line)
   endfor
   return obj
 endfunction
@@ -196,32 +199,39 @@ endfunction
 function Dofunc(obj,line)
   let obj = a:obj
   let line = a:line
-  if (obj.id == 0)
+  let line.fullpath = line['path']
+  if (obj['id'] == 0)
     let obj.path = s:pwd
-    let line = substitute(line,s:pwd,"","")
+    let line.path = substitute(line['path'],s:pwd,"","")
   endif
-  let result = FindWays(line)
-  if (obj.id != 0)
+  if (obj['id'] != 0)
     let newobj ={}
-    let newobj.path = line
+    let newobj.path = line['path']
+    let newobj.lrc_num = line['lrc_num']
+    let newobj.index = line['index']
+    let newobj.fullpath = line['fullpath']
     call add(obj.children,newobj)
   endif 
+  let result = FindWays(line['path'])
   if exists('result.line')
+    let line.path = result['line']
     let tmp = filter(copy(obj.children),"v:val.path == result.path")
     if(len(tmp) == 1)
-      return Dofunc(tmp[0],result.line)
+      return Dofunc(tmp[0],line)
     else
       let newobj={}
       let newobj.path = result.path
       let newobj.children = []
       let newobj.id = 1
       call add(obj.children,newobj)
-      return Dofunc(newobj,result.line)
+      return Dofunc(newobj,line)
     endif
   else
     let newobj ={}
-    let newobj.path = result.path
-    echo obj
+    let newobj.path = result['path']
+    let newobj.lrc_num = line['lrc_num']
+    let newobj.index = line['index']
+    let newobj.fullpath = line['fullpath']
     call add(obj.children,newobj)
   endif
 endfunction
