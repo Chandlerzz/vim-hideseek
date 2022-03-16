@@ -89,7 +89,18 @@ function! BufferRead()
   let obj = Generatetree(deepcopy(s:mlines))
   for line in obj['children']
     let linenr = len(getbufline(bufnr,0,'$'))
-    call appendbufline(bufnr,linenr,line['path'])
+    try
+      let test = line['index']
+      call appendbufline(bufnr,linenr,line['index']+1.line['path'])
+    catch /^Vim\%((\a\+)\)\=:E/
+      call appendbufline(bufnr,linenr,line['path'])
+    endtry
+    if(exists("line['children']"))
+      for l in line['children']
+        let linenr = len(getbufline(bufnr,0,'$'))
+        call appendbufline(bufnr,linenr,"   ".(l['index']+1).l['path'])
+      endfor
+    endif
   endfor
   let currbuf = expand("%:p")
   let tmp = copy(s:mlines)
@@ -211,6 +222,7 @@ function Dofunc(obj,line)
     let newobj.index = line['index']
     let newobj.fullpath = line['fullpath']
     call add(obj.children,newobj)
+    return
   endif 
   let result = FindWays(line['path'])
   if exists('result.line')
@@ -223,7 +235,7 @@ function Dofunc(obj,line)
       let newobj.path = result.path
       let newobj.children = []
       let newobj.id = 1
-      call add(obj.children,newobj)
+      call insert(obj.children,newobj)
       return Dofunc(newobj,line)
     endif
   else

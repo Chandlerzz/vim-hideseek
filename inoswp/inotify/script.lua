@@ -20,5 +20,8 @@ end
 if(string.match(path,"NERD_tree") ~= nil) then 
   return ""
 end
+if(string.match(path,"MERGE") ~= nil) then 
+  return ""
+end
 io.write("Returning data back to C\n");
 return path

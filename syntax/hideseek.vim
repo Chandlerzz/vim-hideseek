@@ -8,6 +8,8 @@ syntax match hideseekTitle /^[A-Za-z-]*/ contained
 syntax match hideseekTitleColon /^[A-Za-z-]*:/ contains=hideseekTitle
 syntax match hideseekReg /^./ contained
 syntax match hideseekRegColon /^.:/ contains=hideseekReg
+syntax match hideseekDirectory /^\/.*/
+highlight default link hideseekDirectory String
 highlight default link hideseekTitle Title 
 highlight default link hideseekTitleColon NonText
 highlight default link hideseekReg Label
