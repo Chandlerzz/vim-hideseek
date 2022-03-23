@@ -91,14 +91,14 @@ function! BufferRead()
     let linenr = len(getbufline(bufnr,0,'$'))
     try
       let test = line['index']
-      call appendbufline(bufnr,linenr,line['index']+1.line['path'])
+      call appendbufline(bufnr,linenr,line['index']+1.": ".line['path'])
     catch /^Vim\%((\a\+)\)\=:E/
       call appendbufline(bufnr,linenr,line['path'])
     endtry
     if(exists("line['children']"))
       for l in line['children']
         let linenr = len(getbufline(bufnr,0,'$'))
-        call appendbufline(bufnr,linenr,"   ".(l['index']+1).l['path'])
+        call appendbufline(bufnr,linenr,"".(l['index']+1).":   ".l['path'])
       endfor
     endif
   endfor
