@@ -1,3 +1,4 @@
 *.o
 *.a
 **/inotify_swp
+__pycache__
