@@ -281,3 +281,4 @@ endfunction
 
 command! -bar -nargs=0 OpenBufferList :call OpenBufferList()  
 
+command! -nargs=* -bang -complete=customlist,hideseek#Any#parseArguments Leaderf call hideseek#Any#start(<bang>0, <q-args>)

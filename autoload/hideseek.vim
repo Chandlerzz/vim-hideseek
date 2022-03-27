@@ -29,6 +29,12 @@ else
     endif
 endif
 
+silent! exec g:Hs_py "pass"
+exec g:Hs_py "import vim, sys, os, re, os.path"
+exec g:Hs_py "cwd = vim.eval('expand(\"<sfile>:p:h\")')"
+exec g:Hs_py "cwd = re.sub(r'(?<=^.)', ':', os.sep.join(cwd.split('/')[1:])) if os.name == 'nt' and cwd.startswith('/') else cwd"
+exec g:Hs_py "sys.path.insert(0, os.path.join(cwd, 'hideseek', 'python'))"
+
 function! hideseek#versionCheck()
     if g:Lf_PythonVersion == 2 && pyeval("sys.version_info < (2, 7)")
         echohl Error

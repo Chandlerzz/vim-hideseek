@@ -3,7 +3,7 @@ if hideseek#versionCheck() == 0  " this check is necessary
     finish
 endif
 
-exec g:Hs_py "from leaderf.anyExpl import *"
+exec g:Hs_py "from hideseek.anyExpl import *"
 
 
 let g:Rs_Helps = {
