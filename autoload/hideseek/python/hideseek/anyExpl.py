@@ -53,7 +53,7 @@ let g:Lf_Extensions = {
 """
 
 def lfFunction(name):
-    if lfEval("has('nvim')") == '1':
+    if hsEval("has('nvim')") == '1':
         func = partial(vim.call, name)
     else:
         func = vim.Function(name)
@@ -89,13 +89,142 @@ Leaderf[!] gtags --by-context [--auto-jump [<TYPE>]] [-i] [--literal] [--path-st
                   [--nameOnly | --fullPath | --fuzzy | --regexMode] [--nowrap] [--next | --previous]
  \n
 """
-class LfHelpFormatter(argparse.HelpFormatter):
+
+class HsShlex(shlex.shlex):
+    """
+    shlex.split(r' "aaa\"bbb" ', posix=False) produces the result ['"aaa\\"', 'bbb"'],
+    which is not expected.
+    I want the result to be ['"aaa\\"bbb"']
+    """
+    def read_token(self):
+        quoted = False
+        escapedstate = ' '
+        while True:
+            nextchar = self.instream.read(1)
+            if nextchar == '\n':
+                self.lineno = self.lineno + 1
+            if self.debug >= 3:
+                print("shlex: in state", repr(self.state), \
+                      "I see character:", repr(nextchar))
+            if self.state is None:
+                self.token = ''        # past end of file
+                break
+            elif self.state == ' ':
+                if not nextchar:
+                    self.state = None  # end of file
+                    break
+                elif nextchar in self.whitespace:
+                    if self.debug >= 2:
+                        print("shlex: I see whitespace in whitespace state")
+                    if self.token or (self.posix and quoted):
+                        break   # emit current token
+                    else:
+                        continue
+                elif self.posix and nextchar in self.escape:
+                    escapedstate = 'a'
+                    self.state = nextchar
+                elif nextchar in self.wordchars:
+                    self.token = nextchar
+                    self.state = 'a'
+                elif nextchar in self.quotes:
+                    if not self.posix:
+                        self.token = nextchar
+                    self.state = nextchar
+                elif self.whitespace_split:
+                    self.token = nextchar
+                    self.state = 'a'
+                else:
+                    self.token = nextchar
+                    if self.token or (self.posix and quoted):
+                        break   # emit current token
+                    else:
+                        continue
+            elif self.state in self.quotes:
+                quoted = True
+                if not nextchar:      # end of file
+                    if self.debug >= 2:
+                        print("shlex: I see EOF in quotes state")
+                    # XXX what error should be raised here?
+                    raise ValueError("No closing quotation")
+                if nextchar == self.state:
+                    if not self.posix:
+                        self.token = self.token + nextchar
+                        self.state = ' '
+                        break
+                    else:
+                        self.state = 'a'
+                elif self.posix and nextchar in self.escape and \
+                     self.state in self.escapedquotes:
+                    escapedstate = self.state
+                    self.state = nextchar
+                else:
+                    if nextchar in self.escape:
+                        escapedstate = self.state
+                        self.state = nextchar
+                    self.token = self.token + nextchar
+            elif self.state in self.escape:
+                if not nextchar:      # end of file
+                    if self.debug >= 2:
+                        print("shlex: I see EOF in escape state")
+                    # XXX what error should be raised here?
+                    raise ValueError("No escaped character")
+                # # In posix shells, only the quote itself or the escape
+                # # character may be escaped within quotes.
+                # if escapedstate in self.quotes and \
+                #    nextchar != self.state and nextchar != escapedstate:
+                #     self.token = self.token + self.state
+                self.token = self.token + nextchar
+                self.state = escapedstate
+            elif self.state == 'a':
+                if not nextchar:
+                    self.state = None   # end of file
+                    break
+                elif nextchar in self.whitespace:
+                    if self.debug >= 2:
+                        print("shlex: I see whitespace in word state")
+                    self.state = ' '
+                    if self.token or (self.posix and quoted):
+                        break   # emit current token
+                    else:
+                        continue
+                elif self.posix and nextchar in self.quotes:
+                    self.state = nextchar
+                elif self.posix and nextchar in self.escape:
+                    escapedstate = 'a'
+                    self.state = nextchar
+                elif nextchar in self.wordchars or nextchar in self.quotes \
+                    or self.whitespace_split:
+                    self.token = self.token + nextchar
+                else:
+                    self.pushback.appendleft(nextchar)
+                    if self.debug >= 2:
+                        print("shlex: I see punctuation in word state")
+                    self.state = ' '
+                    if self.token:
+                        break   # emit current token
+                    else:
+                        continue
+        result = self.token
+        self.token = ''
+        if self.posix and not quoted and result == '':
+            result = None
+        if self.debug > 1:
+            if result:
+                print("shlex: raw token=" + repr(result))
+            else:
+                print("shlex: raw token=EOF")
+        return result
+
+    def split(self):
+        self.whitespace_split = True
+        return list(self)
+class HsHelpFormatter(argparse.HelpFormatter):
     def __init__(self,
                  prog,
                  indent_increment=2,
                  max_help_position=24,
                  width=105):
-        super(LfHelpFormatter, self).__init__(prog, indent_increment, max_help_position, width)
+        super(HsHelpFormatter, self).__init__(prog, indent_increment, max_help_position, width)
 
 class AnyHub(object):
     def __init__(self):
@@ -105,7 +234,6 @@ class AnyHub(object):
         self._last_cmd = None
 
     def _add_argument(self, parser, arg_list, positional_args):
-        pass
         """
         Args:
             parser:
@@ -123,13 +251,131 @@ class AnyHub(object):
             positional_args[output]:
                 a list of positional arguments
         """
+        for arg in arg_list:
+            if isinstance(arg, list):
+                group = parser.add_mutually_exclusive_group()
+                self._add_argument(group, arg, positional_args)
+            else:
+                arg_name = arg["name"][0]
+                metavar = arg.get("metavar", None)
+                if arg_name.startswith("-"):
+                    if metavar is None:
+                        metavar = '<' + arg_name.lstrip("-").upper().replace("-", "_") + '>'
+                    add_argument = partial(parser.add_argument, metavar=metavar, dest=arg_name)
+                else:
+                    positional_args.append(arg["name"][0])
+                    add_argument = partial(parser.add_argument, metavar=metavar)
+
+                nargs = arg.get("nargs", None)
+                if nargs is not None:
+                    try:
+                        nargs = int(arg["nargs"])
+                    except: # ? * +
+                        nargs = arg["nargs"]
+
+                choices = arg.get("choices", None)
+                if nargs == 0:
+                    add_argument(*arg["name"], action='store_const', const=[],
+                                 default=argparse.SUPPRESS, help=arg.get("help", ""))
+                elif nargs == "?":
+                    add_argument(*arg["name"], choices=choices, action=OptionalAction, nargs=nargs,
+                                 default=argparse.SUPPRESS, help=arg.get("help", ""))
+                else:
+                    add_argument(*arg["name"], choices=choices, nargs=nargs, action=arg.get("action", None), default=argparse.SUPPRESS,
+                                 help=arg.get("help", ""))
 
     def _default_action(self, category, positional_args, arguments, *args, **kwargs):
+        print(category)
         pass
 
     def start(self, arg_line, *args, **kwargs):
         if self._parser is None:
             self._parser = argparse.ArgumentParser(prog="Hideseek[!]", formatter_class=HsHelpFormatter, epilog="If [!] is given, enter normal mode directly.")
+            self._add_argument(self._parser, hsEval("g:Hs_CommonArguments"), [])
+            subparsers = self._parser.add_subparsers(title="subcommands", description="", help="")
+            extensions = itertools.chain(hsEval("keys(g:Hs_Extensions)"), hsEval("keys(g:Hs_PythonExtensions)"))
+            for category in itertools.chain(extensions,
+                    (i for i in hsEval("keys(g:Lf_Arguments)") if i not in extensions)):
+                positional_args = []
+                if hsEval("has_key(g:Lf_Extensions, '%s')" % category) == '1':
+                    help = hsEval("get(g:Lf_Extensions['%s'], 'help', '')" % category)
+                    arg_def = hsEval("get(g:Lf_Extensions['%s'], 'arguments', [])" % category)
+                elif hsEval("has_key(g:Lf_PythonExtensions, '%s')" % category) == '1':
+                    help = hsEval("get(g:Lf_PythonExtensions['%s'], 'help', '')" % category)
+                    arg_def = hsEval("get(g:Lf_PythonExtensions['%s'], 'arguments', [])" % category)
+                else:
+                    help = hsEval("g:Lf_Helps['%s']" % category)
+                    arg_def = hsEval("g:Lf_Arguments['%s']" % category)
+
+                if category == 'gtags':
+                    parser = subparsers.add_parser(category, usage=gtags_usage, formatter_class=HsHelpFormatter, help=help, epilog="If [!] is given, enter normal mode directly.")
+                else:
+                    parser = subparsers.add_parser(category, help=help, formatter_class=HsHelpFormatter, epilog="If [!] is given, enter normal mode directly.")
+                group = parser.add_argument_group('specific arguments')
+                self._add_argument(group, arg_def, positional_args)
+
+                group = parser.add_argument_group("common arguments")
+                self._add_argument(group, hsEval("g:Lf_CommonArguments"), positional_args)
+
+                parser.set_defaults(start=partial(self._default_action, category, positional_args))
+
+        try:
+            # # do not produce an error when extra arguments are present
+            # the_args = self._parser.parse_known_args(LfShlex(arg_line, posix=False).split())[0]
+
+            # produce an error when extra arguments are present
+            raw_args = HsShlex(arg_line, posix=False).split()
+
+            # ArgumentParser.add_subparsers([title][, description][, prog][, parser_class][, action][, option_string][, dest][, required][, help][, metavar])
+            #   - required - Whether or not a subcommand must be provided, by default False (added in 3.7)
+            if sys.version_info < (3, 7):
+                if "--recall" in raw_args and len([i for i in raw_args if not i.startswith('-')]) == 0:
+                    if self._last_cmd:
+                        self._last_cmd({'--recall': []}, *args, **kwargs)
+                    else:
+                        lfPrintError("LeaderF has not been used yet!")
+                    return
+                elif "--next" in raw_args and len([i for i in raw_args if not i.startswith('-')]) == 0:
+                    if self._last_cmd:
+                        self._last_cmd({'--next': []}, *args, **kwargs)
+                    else:
+                        lfPrintError("LeaderF has not been used yet!")
+                    return
+                elif "--previous" in raw_args and len([i for i in raw_args if not i.startswith('-')]) == 0:
+                    if self._last_cmd:
+                        self._last_cmd({'--previous': []}, *args, **kwargs)
+                    else:
+                        lfPrintError("LeaderF has not been used yet!")
+                    return
+
+            the_args = self._parser.parse_args(raw_args)
+            arguments = vars(the_args)
+            arguments = arguments.copy()
+            if "start" in arguments:
+                del arguments["start"]
+                arguments["arg_line"] = arg_line
+                the_args.start(arguments, *args, **kwargs)
+                self._last_cmd = the_args.start
+            elif "--recall" in arguments:
+                if self._last_cmd:
+                    self._last_cmd(arguments, *args, **kwargs)
+                else:
+                    lfPrintError("LeaderF has not been used yet!")
+            elif "--next" in arguments:
+                if self._last_cmd:
+                    self._last_cmd(arguments, *args, **kwargs)
+                else:
+                    lfPrintError("LeaderF has not been used yet!")
+            elif "--previous" in arguments:
+                if self._last_cmd:
+                    self._last_cmd(arguments, *args, **kwargs)
+                else:
+                    lfPrintError("LeaderF has not been used yet!")
+        # except ValueError as e:
+        #     lfPrintError(e)
+        #     return
+        except SystemExit:
+            return
 
 #*****************************************************
 # anyHub is a singleton

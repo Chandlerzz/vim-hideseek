@@ -36,17 +36,17 @@ exec g:Hs_py "cwd = re.sub(r'(?<=^.)', ':', os.sep.join(cwd.split('/')[1:])) if 
 exec g:Hs_py "sys.path.insert(0, os.path.join(cwd, 'hideseek', 'python'))"
 
 function! hideseek#versionCheck()
-    if g:Lf_PythonVersion == 2 && pyeval("sys.version_info < (2, 7)")
+    if g:Hs_PythonVersion == 2 && pyeval("sys.version_info < (2, 7)")
         echohl Error
         echo "Error: LeaderF requires python2.7+, your current version is " . pyeval("sys.version")
         echohl None
         return 0
-    elseif g:Lf_PythonVersion == 3 && py3eval("sys.version_info < (3, 1)")
+    elseif g:Hs_PythonVersion == 3 && py3eval("sys.version_info < (3, 1)")
         echohl Error
         echo "Error: LeaderF requires python3.1+, your current version is " . py3eval("sys.version")
         echohl None
         return 0
-    elseif g:Lf_PythonVersion != 2 && g:Lf_PythonVersion != 3
+    elseif g:Hs_PythonVersion != 2 && g:Hs_PythonVersion != 3
         echohl Error
         echo "Error: Invalid value of `g:Lf_PythonVersion`, value must be 2 or 3."
         echohl None
@@ -81,7 +81,10 @@ function! s:InitDict(var, dict)
 endfunction
 
 function! hideseek#HsPy(cmd)
-  g:Hs_py a:cmd
+  exec g:Hs_py a:cmd
 endfunction
+
+call s:InitVar('g:Lf_Extensions', {})
+call s:InitVar('g:Lf_PythonExtensions', {})
 
 
