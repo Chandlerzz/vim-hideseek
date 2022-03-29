@@ -59,13 +59,13 @@ def lfFunction(name):
         func = vim.Function(name)
     return func
 
-class LfHelpFormatter(argparse.HelpFormatter):
+class HsHelpFormatter(argparse.HelpFormatter):
     def __init__(self,
                  prog,
                  indent_increment=2,
                  max_help_position=24,
                  width=105):
-        super(LfHelpFormatter, self).__init__(prog, indent_increment, max_help_position, width)
+        super(HsHelpFormatter, self).__init__(prog, indent_increment, max_help_position, width)
 
 gtags_usage = """
 \n
@@ -89,6 +89,13 @@ Leaderf[!] gtags --by-context [--auto-jump [<TYPE>]] [-i] [--literal] [--path-st
                   [--nameOnly | --fullPath | --fuzzy | --regexMode] [--nowrap] [--next | --previous]
  \n
 """
+class LfHelpFormatter(argparse.HelpFormatter):
+    def __init__(self,
+                 prog,
+                 indent_increment=2,
+                 max_help_position=24,
+                 width=105):
+        super(LfHelpFormatter, self).__init__(prog, indent_increment, max_help_position, width)
 
 class AnyHub(object):
     def __init__(self):
@@ -121,7 +128,8 @@ class AnyHub(object):
         pass
 
     def start(self, arg_line, *args, **kwargs):
-        pass
+        if self._parser is None:
+            self._parser = argparse.ArgumentParser(prog="Hideseek[!]", formatter_class=HsHelpFormatter, epilog="If [!] is given, enter normal mode directly.")
 
 #*****************************************************
 # anyHub is a singleton
