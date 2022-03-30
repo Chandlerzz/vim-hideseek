@@ -9,7 +9,7 @@ exec g:Hs_py "from hideseek.anyExpl import *"
 let g:Hs_Helps = {
             \ }
 
-let g:Lf_Arguments = {
+let g:Hs_Arguments = {
             \ "file":[
             \           [
             \               {"name": ["directory"], "nargs": "?", "help": "serarch files under <directory>"},
@@ -99,7 +99,7 @@ let g:Lf_Arguments = {
             \           ],
             \           {"name": ["--append"], "nargs": 0, "help": "Append to the previous search results."},
             \           {"name": ["--match-path"], "nargs": 0, "help": "Match the file path when fuzzy searching."},
-            \           {"name": ["--wd-mode"], "nargs": 1, "metavar": "<MODE>", "help": "Specify the working directory mode, value has the same meaning as g:Lf_WorkingDirectoryMode."},
+            \           {"name": ["--wd-mode"], "nargs": 1, "metavar": "<MODE>", "help": "Specify the working directory mode, value has the same meaning as g:Hs_WorkingDirectoryMode."},
             \   ],
             \ "gtags":[
             \           [

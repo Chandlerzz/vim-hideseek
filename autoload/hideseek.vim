@@ -84,7 +84,7 @@ function! hideseek#HsPy(cmd)
   exec g:Hs_py a:cmd
 endfunction
 
-call s:InitVar('g:Lf_Extensions', {})
-call s:InitVar('g:Lf_PythonExtensions', {})
+call s:InitVar('g:Hs_Extensions', {})
+call s:InitVar('g:Hs_PythonExtensions', {})
 
 
