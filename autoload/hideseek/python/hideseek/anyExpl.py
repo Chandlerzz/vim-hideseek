@@ -311,8 +311,13 @@ class AnyHub(object):
                                  help=arg.get("help", ""))
 
     def _default_action(self, category, positional_args, arguments, *args, **kwargs):
-        print(category)
-        pass
+        if category == "mru":
+            pass
+        elif category == "gitstatus":
+            pass
+        elif category == "mrutree":
+            pass
+        hsCmd('OpenBufferList')
 
     def start(self, arg_line, *args, **kwargs):
         if self._parser is None:
