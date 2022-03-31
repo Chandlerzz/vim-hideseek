@@ -17,7 +17,7 @@ from .explorer import *
 
 
 """
-let g:Lf_Extensions = {
+let g:Hs_Extensions = {
     \ "apple": {
     \       "source": [], "grep -r '%s' *", funcref (arguments), {"command": "ls" or funcref(arguments)}
     \       "arguments": [
@@ -37,12 +37,12 @@ let g:Lf_Extensions = {
     \       "before_exit": funcref (orig_buf_nr, orig_cursor, arguments),
     \       "after_exit": funcref (arguments),
     \       "highlights_def": {
-    \               "Lf_hl_apple": '^\s*\zs\d\+',
-    \               "Lf_hl_appleId": '\d\+$',
+    \               "Hs_hl_apple": '^\s*\zs\d\+',
+    \               "Hs_hl_appleId": '\d\+$',
     \       },
     \       "highlights_cmd": [
-    \               "hi Lf_hl_apple guifg=red",
-    \               "hi Lf_hl_appleId guifg=green",
+    \               "hi Hs_hl_apple guifg=red",
+    \               "hi Hs_hl_appleId guifg=green",
     \       ],
     \       "highlight": funcref (arguments),
     \       "supports_multi": 0,
@@ -89,6 +89,32 @@ Leaderf[!] gtags --by-context [--auto-jump [<TYPE>]] [-i] [--literal] [--path-st
                   [--nameOnly | --fullPath | --fuzzy | --regexMode] [--nowrap] [--next | --previous]
  \n
 """
+
+class OptionalAction(argparse.Action):
+    def __init__(self,
+                 option_strings,
+                 dest,
+                 nargs=None,
+                 const=None,
+                 default=None,
+                 type=None,
+                 choices=None,
+                 required=False,
+                 help=None,
+                 metavar=None):
+        super(OptionalAction, self).__init__(option_strings=option_strings,
+                                             dest=dest,
+                                             nargs=nargs,
+                                             const=const,
+                                             default=default,
+                                             type=type,
+                                             choices=choices,
+                                             required=required,
+                                             help=help,
+                                             metavar=metavar)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, [] if values is None else [values])
 
 class HsShlex(shlex.shlex):
     """
@@ -295,17 +321,17 @@ class AnyHub(object):
             subparsers = self._parser.add_subparsers(title="subcommands", description="", help="")
             extensions = itertools.chain(hsEval("keys(g:Hs_Extensions)"), hsEval("keys(g:Hs_PythonExtensions)"))
             for category in itertools.chain(extensions,
-                    (i for i in hsEval("keys(g:Lf_Arguments)") if i not in extensions)):
+                    (i for i in hsEval("keys(g:Hs_Arguments)") if i not in extensions)):
                 positional_args = []
-                if hsEval("has_key(g:Lf_Extensions, '%s')" % category) == '1':
-                    help = hsEval("get(g:Lf_Extensions['%s'], 'help', '')" % category)
-                    arg_def = hsEval("get(g:Lf_Extensions['%s'], 'arguments', [])" % category)
-                elif hsEval("has_key(g:Lf_PythonExtensions, '%s')" % category) == '1':
-                    help = hsEval("get(g:Lf_PythonExtensions['%s'], 'help', '')" % category)
-                    arg_def = hsEval("get(g:Lf_PythonExtensions['%s'], 'arguments', [])" % category)
+                if hsEval("has_key(g:Hs_Extensions, '%s')" % category) == '1':
+                    help = hsEval("get(g:Hs_Extensions['%s'], 'help', '')" % category)
+                    arg_def = hsEval("get(g:Hs_Extensions['%s'], 'arguments', [])" % category)
+                elif hsEval("has_key(g:Hs_PythonExtensions, '%s')" % category) == '1':
+                    help = hsEval("get(g:Hs_PythonExtensions['%s'], 'help', '')" % category)
+                    arg_def = hsEval("get(g:Hs_PythonExtensions['%s'], 'arguments', [])" % category)
                 else:
-                    help = hsEval("g:Lf_Helps['%s']" % category)
-                    arg_def = hsEval("g:Lf_Arguments['%s']" % category)
+                    help = hsEval("g:Hs_Helps['%s']" % category)
+                    arg_def = hsEval("g:Hs_Arguments['%s']" % category)
 
                 if category == 'gtags':
                     parser = subparsers.add_parser(category, usage=gtags_usage, formatter_class=HsHelpFormatter, help=help, epilog="If [!] is given, enter normal mode directly.")
@@ -315,13 +341,13 @@ class AnyHub(object):
                 self._add_argument(group, arg_def, positional_args)
 
                 group = parser.add_argument_group("common arguments")
-                self._add_argument(group, hsEval("g:Lf_CommonArguments"), positional_args)
+                self._add_argument(group, hsEval("g:Hs_CommonArguments"), positional_args)
 
                 parser.set_defaults(start=partial(self._default_action, category, positional_args))
 
         try:
             # # do not produce an error when extra arguments are present
-            # the_args = self._parser.parse_known_args(LfShlex(arg_line, posix=False).split())[0]
+            # the_args = self._parser.parse_known_args(HsShlex(arg_line, posix=False).split())[0]
 
             # produce an error when extra arguments are present
             raw_args = HsShlex(arg_line, posix=False).split()

@@ -7,6 +7,27 @@ exec g:Hs_py "from hideseek.anyExpl import *"
 
 
 let g:Hs_Helps = {
+            \ "file":           "search files",
+            \ "buffer":         "search buffers",
+            \ "mru":            "search most recently used files",
+            \ "tag":            "navigate tags using the tags file",
+            \ "bufTag":         "navigate tags in the buffer",
+            \ "function":       "navigate functions or methods in the buffer",
+            \ "line":           "search a line in the buffer",
+            \ "cmdHistory":     "execute the command in the history",
+            \ "searchHistory":  "execute the search command in the history",
+            \ "help":           "navigate the help tags",
+            \ "colorscheme":    "switch between colorschemes",
+            \ "self":           "execute the commands of itself",
+            \ "z":              "z",
+            \ "rg":             "grep using rg",
+            \ "gtags":          "navigate tags using the gtags",
+            \ "filetype":       "navigate the filetype",
+            \ "command":        "execute built-in/user-defined Ex commands",
+            \ "window":         "search windows",
+            \ "quickfix":       "navigate quickfix",
+            \ "loclist":        "navigate location list",
+            \ "jumps":          "navigate jumps list",
             \ }
 
 let g:Hs_Arguments = {
