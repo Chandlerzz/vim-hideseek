@@ -1,4 +1,5 @@
 
+#mrutreeExpl
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -28,7 +29,3 @@ class MruExplorer(Explorer):
     def getStlCurDir(self):
         curDir = ""
         return curDir
-
-mruExplorer = MruExplorer()
-
-__all__ = ['mruExplorer']
