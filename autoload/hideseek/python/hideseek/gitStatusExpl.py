@@ -13,7 +13,7 @@ import locale
 from functools import wraps
 from .explorer import *
 
-class MruExplorer(Explorer):
+class GitStatusExplore(Explorer):
     def __init__(self):
         self._cur_dir = ''
         self._content = []
@@ -29,3 +29,7 @@ class MruExplorer(Explorer):
     def getStlCurDir(self):
         curDir = ""
         return curDir
+
+gitStatusExpl = GitStatusExplore()
+
+__all__ = ['gitStatusExpl']

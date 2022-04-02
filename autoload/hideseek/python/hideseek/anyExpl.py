@@ -312,12 +312,16 @@ class AnyHub(object):
 
     def _default_action(self, category, positional_args, arguments, *args, **kwargs):
         if category == "mru":
-            pass
+            from .mruExpl import mruExpl 
+            manager = mruExpl
         elif category == "gitstatus":
-            pass
+            from .gitStatusExpl import gitStatusExpl 
         elif category == "mrutree":
-            pass
+            manager = gitStatusExpl
+            from .mruTreeExpl import mruTreeExpl
+            manager = mruTreeExpl
         hsCmd('OpenBufferList')
+        print(manager)
 
     def start(self, arg_line, *args, **kwargs):
         if self._parser is None:

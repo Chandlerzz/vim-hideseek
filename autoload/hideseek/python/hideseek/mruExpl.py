@@ -29,6 +29,6 @@ class MruExplorer(Explorer):
         curDir = ""
         return curDir
 
-mruExplorer = MruExplorer()
+mruExpl = MruExplorer()
 
-__all__ = ['mruExplorer']
+__all__ = ['mruExpl']
