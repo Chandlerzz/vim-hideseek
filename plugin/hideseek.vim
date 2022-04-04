@@ -19,6 +19,13 @@ augroup bufferSel
   autocmd DirChanged * call NERDTreeCWD1()
 augroup END
 
+function hideseek#getBufnr()
+  let bufname = s:bufname
+  let bufnr = bufadd(s:bufname)
+  call bufload(bufnr)
+  return bufnr
+endfunction
+
 function NERDTreeCWD1()
   for i in tabpagebuflist()
     if (bufname(i) =~ "NERD")
@@ -68,14 +75,14 @@ function! BufferRead()
   call bufload(bufnr)
   call setbufvar(bufnr,"&statusline",s:pwd)
   let linenr = len(getbufline(bufnr,0,'$'))
-  call s:clearAllLines(bufnr,linenr)
-  let linenr = s:getbufnr(bufnr)
+  call hideseek#clearAllLines(bufnr,linenr)
+  let linenr = hideseek#getbuflinenr(bufnr)
   call appendbufline(bufnr, linenr, "MRU:")
   let lrclines = systemlist("cat ".s:lrcname)
   for index in range(len(lrclines)) 
     let lrcline = lrclines[index]
     if(match(lrcline, s:pwd) > -1)
-      let linenr = s:getbufnr(bufnr)
+      let linenr = hideseek#getbuflinenr(bufnr)
       let lrcline = split(lrcline,"%")[0]
       call add(s:mlines, {'lrc_num':index+1,'path':lrcline,'index':len(s:mlines)})
       let lrcline = substitute(lrcline,s:pwd,"","")
@@ -175,7 +182,7 @@ function! s:inputtarget()
   endif
 endfunction
 
-function s:clearAllLines(bufnr,linenr)
+function hideseek#clearAllLines(bufnr,linenr)
   let bufnr = a:bufnr
   let linenr = a:linenr
   if (linenr == 0 )
@@ -183,10 +190,10 @@ function s:clearAllLines(bufnr,linenr)
   endif
   call deletebufline(bufnr,linenr)
   let linenr = linenr - 1
-  return  s:clearAllLines(bufnr,linenr)
+  return  hideseek#clearAllLines(bufnr,linenr)
 endfunction
 
-function s:getbufnr(bufnr)
+function hideseek#getbuflinenr(bufnr)
   return len(getbufline(a:bufnr,0,'$')) -1
 endfunction
 

@@ -320,8 +320,16 @@ class AnyHub(object):
             manager = gitStatusExpl
             from .mruTreeExpl import mruTreeExpl
             manager = mruTreeExpl
-        hsCmd('OpenBufferList')
-        print(manager)
+        content = manager.getContent()
+        header = manager.getStlCategory()
+        content.insert(0,header)
+        bufnr = hsEval("hideseek#getBufnr()")
+        linenr = hsEval("len(getbufline({},0,'$'))".format(bufnr))
+        hsEval("hideseek#clearAllLines({},{})".format(bufnr,linenr))
+        for line in content:
+            linenr = hsEval("hideseek#getbuflinenr({})".format(bufnr))
+            hsEval("appendbufline({},{},\"{}\")".format(bufnr,linenr,line))
+
 
     def start(self, arg_line, *args, **kwargs):
         if self._parser is None:
