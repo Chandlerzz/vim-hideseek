@@ -12,6 +12,7 @@ import time
 import locale
 from functools import wraps
 from .explorer import *
+from .utils import *
 
 class GitStatusExplore(Explorer):
     def __init__(self):
@@ -20,11 +21,11 @@ class GitStatusExplore(Explorer):
         self._cmd_work_dir = ""
 
     def getContent(self, *args, **kwargs):
-        content = ""
+        content = hsEval("systemlist('git status -s --untracked-files')")
         return content
 
     def getStlCategory(self):
-        return "Mru"
+        return "git status"
 
     def getStlCurDir(self):
         curDir = ""

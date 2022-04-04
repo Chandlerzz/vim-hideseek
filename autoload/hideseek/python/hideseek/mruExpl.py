@@ -31,6 +31,7 @@ class MruExplorer(Explorer):
                     line = line.split("%")[0]
                     content.append(re.sub(curr_dir+"/","",line))
             for index in range(len(content)):
+
                 content[index] = "{}: {}".format(index+1, content[index])
             return content
 

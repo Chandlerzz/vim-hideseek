@@ -314,8 +314,9 @@ class AnyHub(object):
         if category == "mru":
             from .mruExpl import mruExpl 
             manager = mruExpl
-        elif category == "gitstatus":
+        elif category == "gits":
             from .gitStatusExpl import gitStatusExpl 
+            manager = gitStatusExpl
         elif category == "mrutree":
             manager = gitStatusExpl
             from .mruTreeExpl import mruTreeExpl

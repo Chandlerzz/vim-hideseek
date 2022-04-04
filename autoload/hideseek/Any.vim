@@ -10,6 +10,7 @@ let g:Hs_Helps = {
             \ "file":           "search files",
             \ "buffer":         "search buffers",
             \ "mru":            "search most recently used files",
+            \ "gits":      "git status -s --untracked-files",
             \ "tag":            "navigate tags using the tags file",
             \ "bufTag":         "navigate tags in the buffer",
             \ "function":       "navigate functions or methods in the buffer",
@@ -62,6 +63,7 @@ let g:Hs_Arguments = {
             \ "colorscheme":[],
             \ "self":[],
             \ "z":[],
+            \ "gits":[],
             \ "rg":[
             \           {"name": ["-A", "--after-context"], "nargs": 1, "metavar": "<NUM>", "help": "Show NUM lines after each match."},
             \           {"name": ["-B", "--before-context"], "nargs": 1, "metavar": "<NUM>", "help": "Show NUM lines before each match."},
