@@ -225,7 +225,7 @@ function! hideseek#Any#start(bang, args) abort
     if a:args == ""
 
     else
-        call hideseek#HsPy("anyHub.start(r''' ".a:args." ''', bang=".a:bang.")")
+        call hideseek#HsPy("anyHub1.start(r''' ".a:args." ''', bang=".a:bang.")")
     endif
 endfunction
 

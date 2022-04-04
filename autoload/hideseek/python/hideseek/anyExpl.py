@@ -423,6 +423,6 @@ class AnyHub(object):
 #*****************************************************
 # anyHub is a singleton
 #*****************************************************
-anyHub = AnyHub()
+anyHub1 = AnyHub()
 
-__all__ = ['anyHub']
+__all__ = ['anyHub1']
