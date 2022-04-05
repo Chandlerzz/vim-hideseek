@@ -9,8 +9,6 @@ exec g:Hs_py "from hideseek.anyExpl import *"
 let g:Hs_Helps = {
             \ "file":           "search files",
             \ "buffer":         "search buffers",
-            \ "mru":            "search most recently used files",
-            \ "gits":      "git status -s --untracked-files",
             \ "tag":            "navigate tags using the tags file",
             \ "bufTag":         "navigate tags in the buffer",
             \ "function":       "navigate functions or methods in the buffer",
@@ -29,6 +27,9 @@ let g:Hs_Helps = {
             \ "quickfix":       "navigate quickfix",
             \ "loclist":        "navigate location list",
             \ "jumps":          "navigate jumps list",
+            \ "mru":            "search most recently used files",
+            \ "mrutree":        "mru tree",
+            \ "gits":           "git status -s --untracked-files",
             \ }
 
 let g:Hs_Arguments = {
@@ -42,10 +43,6 @@ let g:Hs_Arguments = {
             \ "buffer":[
             \           {"name": ["--all"], "nargs": 0, "help": "search all buffers in addition to the listed buffers"},
             \           {"name": ["--tabpage"], "nargs": 0, "help": "search buffers in current tabpage"},
-            \   ],
-            \ "mru":[
-            \           {"name": ["--cwd"], "nargs": 0, "help": "search MRU in current working directory"},
-            \           {"name": ["--no-split-path"], "nargs": 0, "help": "do not split the path"},
             \   ],
             \ "tag":[],
             \ "bufTag":[
@@ -63,7 +60,6 @@ let g:Hs_Arguments = {
             \ "colorscheme":[],
             \ "self":[],
             \ "z":[],
-            \ "gits":[],
             \ "rg":[
             \           {"name": ["-A", "--after-context"], "nargs": 1, "metavar": "<NUM>", "help": "Show NUM lines after each match."},
             \           {"name": ["-B", "--before-context"], "nargs": 1, "metavar": "<NUM>", "help": "Show NUM lines before each match."},
@@ -165,6 +161,12 @@ let g:Hs_Arguments = {
             \ "quickfix": [],
             \ "loclist": [],
             \ "jumps": [],
+            \ "mru":[
+            \           {"name": ["--cwd"], "nargs": 0, "help": "search MRU in current working directory"},
+            \           {"name": ["--no-split-path"], "nargs": 0, "help": "do not split the path"},
+            \   ],
+            \ "gits":[],
+            \ "mrutree":[],
             \}
 
 let g:Hs_CommonArguments = [

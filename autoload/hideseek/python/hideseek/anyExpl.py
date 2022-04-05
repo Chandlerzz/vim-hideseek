@@ -318,7 +318,6 @@ class AnyHub(object):
             from .gitStatusExpl import gitStatusExpl 
             manager = gitStatusExpl
         elif category == "mrutree":
-            manager = gitStatusExpl
             from .mruTreeExpl import mruTreeExpl
             manager = mruTreeExpl
         content = manager.getContent()

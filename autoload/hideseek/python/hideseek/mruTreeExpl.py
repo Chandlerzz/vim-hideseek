@@ -20,11 +20,11 @@ class MruTreeExplorer(Explorer):
         self._cmd_work_dir = ""
 
     def getContent(self, *args, **kwargs):
-        content = ""
+        content = []
         return content
 
     def getStlCategory(self):
-        return "Mru"
+        return "mruTree"
 
     def getStlCurDir(self):
         curDir = ""
