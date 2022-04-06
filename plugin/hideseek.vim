@@ -19,6 +19,10 @@ augroup bufferSel
   autocmd DirChanged * call NERDTreeCWD1()
 augroup END
 
+function hideseek#setmlines(mlines)
+  s:mlines:mlines
+endfunction
+
 function hideseek#getBufnr()
   let bufname = s:bufname
   let bufnr = bufadd(s:bufname)
