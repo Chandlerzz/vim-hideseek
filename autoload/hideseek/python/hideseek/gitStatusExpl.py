@@ -34,6 +34,7 @@ class GitStatusExplore(Explorer):
     def getStlCategory(self):
         return "gits"
 
+
     def getStlCurDir(self):
         curDir = ""
         return curDir
