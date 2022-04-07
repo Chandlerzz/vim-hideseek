@@ -23,11 +23,12 @@ class GitStatusExplore(Explorer):
     def getContent(self, *args, **kwargs):
         content = hsEval("systemlist('git status -s --untracked-files')")
         content = [ item.split(" ")[2] for item in content ]
+        hsEval("hideseek#clearDict()")
         for index in range(len(content)):
-            line = content[index]
+            line = os.path.abspath(content[index])
             dicts ={'lrc_num':index+1,'path':line}
             hsEval("hideseek#addDict('{}',{})".format(index+1,dicts))
-            content[index] = str(index+1)+": "+line
+            content[index] = str(index+1)+": "+ content[index]
         return content
 
     def getStlCategory(self):

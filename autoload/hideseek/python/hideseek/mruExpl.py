@@ -27,6 +27,7 @@ class MruExplorer(Explorer):
             lines = f.readlines()
             curr_dir = self._curr_dir
             start = 1
+            hsEval("hideseek#clearDict()")
             for index in range(len(lines)):
                 line = lines[index]
                 if re.match(curr_dir,line):

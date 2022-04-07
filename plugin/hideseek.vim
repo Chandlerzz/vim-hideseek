@@ -23,6 +23,9 @@ augroup END
 function hideseek#addDict(key,value)
   let s:mlinesdict[a:key] = a:value
 endfunction
+function hideseek#clearDict()
+  let s:mlinesdict = {}
+endfunction
 
 function hideseek#setCategory(category)
   let s:category = a:category
