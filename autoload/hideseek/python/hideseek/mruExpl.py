@@ -29,9 +29,12 @@ class MruExplorer(Explorer):
             for line in lines:
                 if re.match(curr_dir,line):
                     line = line.split("%")[0]
-                    content.append(re.sub(curr_dir+"/","",line))
+                    # content.append(re.sub(curr_dir+"/","",line))
+                    # the absolute path needed
+                    content.append(line)
             for index in range(len(content)):
-
+                content[index]=re.sub(curr_dir+"/","",content[index])
+                # TODO need put every line to the the dictionary
                 content[index] = "{}: {}".format(index+1, content[index])
             return content
 

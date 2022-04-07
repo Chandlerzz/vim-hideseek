@@ -321,8 +321,6 @@ class AnyHub(object):
             from .mruTreeExpl import mruTreeExpl
             manager = mruTreeExpl
         content = manager.getContent()
-         hsEval("hideseek#setmlines({})".format(content))
-        print("hideseek#setmlines({})".format(content))
         header = manager.getStlCategory()
         content.insert(0,header)
         bufnr = hsEval("hideseek#getBufnr()")
