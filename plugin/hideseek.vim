@@ -9,6 +9,7 @@ nnoremap ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>n :call OpenBufferList()<cr>
 " matched lines
 let s:mlines = []
+let s:mlinesdict = {}
 let s:pwd = getcwd()
 let s:bufname = "/tmp/hideseek.hideseek"
 let s:lrcname = expand("~/.lrc")
@@ -19,8 +20,12 @@ augroup bufferSel
   autocmd DirChanged * call NERDTreeCWD1()
 augroup END
 
-function hideseek#setmlines(mlines)
-  s:mlines:mlines
+function hideseek#addDict(key,value)
+  let s:mlinesdict[a:key] = a:value
+endfunction
+
+function hideseek#test()
+  echo s:mlinesdict
 endfunction
 
 function hideseek#getBufnr()
@@ -89,6 +94,7 @@ function! BufferRead()
       let linenr = hideseek#getbuflinenr(bufnr)
       let lrcline = split(lrcline,"%")[0]
       call add(s:mlines, {'lrc_num':index+1,'path':lrcline,'index':len(s:mlines)})
+      call hideseek#addDict(''.(index+1),{'lrc_num':index+1,'path':lrcline,'index':len(s:mlines)})
       let lrcline = substitute(lrcline,s:pwd,"","")
       let lrcline = len(s:mlines).": ".lrcline
       call appendbufline(bufnr,linenr,lrcline)
@@ -97,22 +103,22 @@ function! BufferRead()
       endif
     endif
   endfor
-  let obj = Generatetree(deepcopy(s:mlines))
-  for line in obj['children']
-    let linenr = len(getbufline(bufnr,0,'$'))
-    try
-      let test = line['index']
-      call appendbufline(bufnr,linenr,line['index']+1.": ".line['path'])
-    catch /^Vim\%((\a\+)\)\=:E/
-      call appendbufline(bufnr,linenr,line['path'])
-    endtry
-    if(exists("line['children']"))
-      for l in line['children']
-        let linenr = len(getbufline(bufnr,0,'$'))
-        call appendbufline(bufnr,linenr,"".(l['index']+1).":   ".l['path'])
-      endfor
-    endif
-  endfor
+  " let obj = Generatetree(deepcopy(s:mlines))
+  " for line in obj['children']
+  "   let linenr = len(getbufline(bufnr,0,'$'))
+  "   try
+  "     let test = line['index']
+  "     call appendbufline(bufnr,linenr,line['index']+1.": ".line['path'])
+  "   catch /^Vim\%((\a\+)\)\=:E/
+  "     call appendbufline(bufnr,linenr,line['path'])
+  "   endtry
+  "   if(exists("line['children']"))
+  "     for l in line['children']
+  "       let linenr = len(getbufline(bufnr,0,'$'))
+  "       call appendbufline(bufnr,linenr,"".(l['index']+1).":   ".l['path'])
+  "     endfor
+  "   endif
+  " endfor
   let currbuf = expand("%:p")
   let tmp = copy(s:mlines)
   let tmp = filter(tmp,'v:val.path == currbuf')
@@ -130,7 +136,12 @@ function SelectBuffer(type) abort
   let head=charr[:-2]
   let tail=charr[-1:-1]
   if (a:type == "lrc")
-    let lrcline = s:mlines[head-1]['path']
+    try
+      let lrcline = s:mlines[head-1]['path']
+      " let lrcline = s:mlinesdict[''.head]['path']
+    catch /^Vim\%((\a\+)\)\=:E/
+    endtry
+     
     if tail =~ "e"
       silent exe 'e ' ..lrcline 
     else
@@ -138,6 +149,7 @@ function SelectBuffer(type) abort
     endif
   elseif (a:type == "delete")
     let head = s:mlines[head-1]['lrc_num']
+    " let head = s:mlinesdict[''.head]['lrc_num']
     let g:test = head
     call system("inoswp -s ".head)
     execute "sleep"

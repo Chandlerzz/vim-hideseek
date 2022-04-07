@@ -35,6 +35,8 @@ class MruExplorer(Explorer):
             for index in range(len(content)):
                 content[index]=re.sub(curr_dir+"/","",content[index])
                 # TODO need put every line to the the dictionary
+                hsEval("hideseek#addDict('{}','{}')".format(index+1,content[index]))
+                print("hideseek#addDict('{}','{}')".format(index+1,content[index]))
                 content[index] = "{}: {}".format(index+1, content[index])
             return content
 
