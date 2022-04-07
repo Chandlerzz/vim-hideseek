@@ -22,10 +22,16 @@ class GitStatusExplore(Explorer):
 
     def getContent(self, *args, **kwargs):
         content = hsEval("systemlist('git status -s --untracked-files')")
+        content = [ item.split(" ")[2] for item in content ]
+        for index in range(len(content)):
+            line = content[index]
+            dicts ={'lrc_num':index+1,'path':line}
+            hsEval("hideseek#addDict('{}',{})".format(index+1,dicts))
+            content[index] = str(index+1)+": "+line
         return content
 
     def getStlCategory(self):
-        return "git status"
+        return "gits"
 
     def getStlCurDir(self):
         curDir = ""

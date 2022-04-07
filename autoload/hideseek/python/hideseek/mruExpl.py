@@ -26,22 +26,23 @@ class MruExplorer(Explorer):
         with hsOpen(self._mru_source_file, 'r+', errors='ignore') as f:
             lines = f.readlines()
             curr_dir = self._curr_dir
-            for line in lines:
+            start = 1
+            for index in range(len(lines)):
+                line = lines[index]
                 if re.match(curr_dir,line):
                     line = line.split("%")[0]
-                    # content.append(re.sub(curr_dir+"/","",line))
-                    # the absolute path needed
+                    dicts ={'lrc_num':index+1,'path':line}
+                    hsEval("hideseek#addDict('{}',{})".format(start,dicts))
                     content.append(line)
+                    start = start + 1
             for index in range(len(content)):
                 content[index]=re.sub(curr_dir+"/","",content[index])
                 # TODO need put every line to the the dictionary
-                hsEval("hideseek#addDict('{}','{}')".format(index+1,content[index]))
-                print("hideseek#addDict('{}','{}')".format(index+1,content[index]))
                 content[index] = "{}: {}".format(index+1, content[index])
             return content
 
     def getStlCategory(self):
-        return "Mru"
+        return "mru"
 
     def getStlCurDir(self):
         curDir = ""

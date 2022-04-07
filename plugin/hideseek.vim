@@ -8,7 +8,7 @@ nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>n :call OpenBufferList()<cr>
 " matched lines
-let s:mlines = []
+let s:category = "mru"
 let s:mlinesdict = {}
 let s:pwd = getcwd()
 let s:bufname = "/tmp/hideseek.hideseek"
@@ -16,7 +16,7 @@ let s:lrcname = expand("~/.lrc")
 augroup bufferSel
   au!
   autocmd VimEnter * OpenBufferList 
-  autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
+  autocmd VimEnter,bufEnter,tabEnter,DirChanged * execute "Hideseek ".s:category
   autocmd DirChanged * call NERDTreeCWD1()
 augroup END
 
@@ -24,8 +24,8 @@ function hideseek#addDict(key,value)
   let s:mlinesdict[a:key] = a:value
 endfunction
 
-function hideseek#test()
-  echo s:mlinesdict
+function hideseek#setCategory(category)
+  let s:category = a:category
 endfunction
 
 function hideseek#getBufnr()
@@ -76,55 +76,17 @@ function! OpenBufferList()
   endif
 endfunction
 
-function! BufferRead()
-  let oldlines = copy(s:mlines)
-  let s:mlines = []
-  let s:pwd= getcwd()
-  let bufnr = bufadd(s:bufname)
-  call bufload(bufnr)
-  call setbufvar(bufnr,"&statusline",s:pwd)
-  let linenr = len(getbufline(bufnr,0,'$'))
-  call hideseek#clearAllLines(bufnr,linenr)
-  let linenr = hideseek#getbuflinenr(bufnr)
-  call appendbufline(bufnr, linenr, "MRU:")
-  let lrclines = systemlist("cat ".s:lrcname)
-  for index in range(len(lrclines)) 
-    let lrcline = lrclines[index]
-    if(match(lrcline, s:pwd) > -1)
-      let linenr = hideseek#getbuflinenr(bufnr)
-      let lrcline = split(lrcline,"%")[0]
-      call add(s:mlines, {'lrc_num':index+1,'path':lrcline,'index':len(s:mlines)})
-      call hideseek#addDict(''.(index+1),{'lrc_num':index+1,'path':lrcline,'index':len(s:mlines)})
-      let lrcline = substitute(lrcline,s:pwd,"","")
-      let lrcline = len(s:mlines).": ".lrcline
-      call appendbufline(bufnr,linenr,lrcline)
-      if(len(s:mlines) == 9)
-       break 
-      endif
+function hideseek#setHightLight()
+  let bufnr = hideseek#getBufnr()
+  let currbuf = expand("%:p")
+  let matched = 0
+  for key in keys(s:mlinesdict)
+    if(s:mlinesdict[key]['path'] == currbuf)
+      let matched = matched + 1
+      call s:setcurrbufhl(bufnr,key)
     endif
   endfor
-  " let obj = Generatetree(deepcopy(s:mlines))
-  " for line in obj['children']
-  "   let linenr = len(getbufline(bufnr,0,'$'))
-  "   try
-  "     let test = line['index']
-  "     call appendbufline(bufnr,linenr,line['index']+1.": ".line['path'])
-  "   catch /^Vim\%((\a\+)\)\=:E/
-  "     call appendbufline(bufnr,linenr,line['path'])
-  "   endtry
-  "   if(exists("line['children']"))
-  "     for l in line['children']
-  "       let linenr = len(getbufline(bufnr,0,'$'))
-  "       call appendbufline(bufnr,linenr,"".(l['index']+1).":   ".l['path'])
-  "     endfor
-  "   endif
-  " endfor
-  let currbuf = expand("%:p")
-  let tmp = copy(s:mlines)
-  let tmp = filter(tmp,'v:val.path == currbuf')
-  if(len(tmp) >=1)
-    call s:setcurrbufhl(bufnr,tmp[0].index+1)
-  else
+  if(!matched)
     call setbufvar(bufnr, "&syntax","off")
     call setbufvar(bufnr, "&syntax","on")
   endif
@@ -137,8 +99,7 @@ function SelectBuffer(type) abort
   let tail=charr[-1:-1]
   if (a:type == "lrc")
     try
-      let lrcline = s:mlines[head-1]['path']
-      " let lrcline = s:mlinesdict[''.head]['path']
+      let lrcline = s:mlinesdict[''.head]['path']
     catch /^Vim\%((\a\+)\)\=:E/
     endtry
      
@@ -148,12 +109,11 @@ function SelectBuffer(type) abort
       silent exe 'vsp ' ..lrcline 
     endif
   elseif (a:type == "delete")
-    let head = s:mlines[head-1]['lrc_num']
-    " let head = s:mlinesdict[''.head]['lrc_num']
+    let head = s:mlinesdict[''.head]['lrc_num']
     let g:test = head
     call system("inoswp -s ".head)
     execute "sleep"
-    call BufferRead()
+    execute "Hideseek ".s:category
   else
     if tail =~ "e"
       silent exe 'e #' ..head 
@@ -182,7 +142,7 @@ function! s:inputtarget()
   augroup bufferSel
     au!
     autocmd VimEnter * OpenBufferList 
-    autocmd VimEnter,bufEnter,tabEnter,DirChanged * call BufferRead()
+    autocmd VimEnter,bufEnter,tabEnter,DirChanged * execute "Hideseek ".s:category
     autocmd DirChanged * call NERDTreeCWD1()
   augroup END
   while c =~ '^\d\+$'

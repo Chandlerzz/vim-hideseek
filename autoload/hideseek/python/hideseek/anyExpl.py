@@ -322,6 +322,7 @@ class AnyHub(object):
             manager = mruTreeExpl
         content = manager.getContent()
         header = manager.getStlCategory()
+        hsEval("hideseek#setCategory('{}')".format(header))
         content.insert(0,header)
         bufnr = hsEval("hideseek#getBufnr()")
         linenr = hsEval("len(getbufline({},0,'$'))".format(bufnr))
@@ -329,6 +330,7 @@ class AnyHub(object):
         for line in content:
             linenr = hsEval("hideseek#getbuflinenr({})".format(bufnr))
             hsEval("appendbufline({},{},\"{}\")".format(bufnr,linenr,line))
+        hsEval("hideseek#setHightLight()")
 
 
     def start(self, arg_line, *args, **kwargs):
