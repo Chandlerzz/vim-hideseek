@@ -11,7 +11,7 @@ nnoremap <leader>n :call OpenBufferList()<cr>
 let s:category = "mru"
 let s:mlinesdict = {}
 let s:pwd = getcwd()
-let s:bufname = "/tmp/hideseek.hideseek"
+let s:bufname = "/tmp/hideseek".tabpagenr().".hideseek"
 let s:lrcname = expand("~/.lrc")
 augroup bufferSel
   au!
@@ -26,13 +26,17 @@ endfunction
 function hideseek#clearDict()
   let s:mlinesdict = {}
 endfunction
+function hideseek#test()
+  echo s:mlinesdict
+endfunction
 
 function hideseek#setCategory(category)
   let s:category = a:category
 endfunction
 
 function hideseek#getBufnr()
-  let bufname = s:bufname
+  let tabnr = tabpagenr()
+  let s:bufname = "/tmp/hideseek".tabnr.".hideseek"
   let bufnr = bufadd(s:bufname)
   call bufload(bufnr)
   return bufnr
@@ -74,7 +78,6 @@ function! OpenBufferList()
     execute "vert topleft sbuffer ".bufnr." \| vert resize 32"
     setlocal nonumber norelativenumber buftype=nofile bufhidden=hide nobuflisted noswapfile wrap
           \ modifiable  nocursorline nofoldenable
-    setlocal filetype=hideseek
     execute "wincmd p"
   endif
 endfunction

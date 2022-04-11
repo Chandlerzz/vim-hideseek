@@ -330,6 +330,8 @@ class AnyHub(object):
         for line in content:
             linenr = hsEval("hideseek#getbuflinenr({})".format(bufnr))
             hsEval("appendbufline({},{},\"{}\")".format(bufnr,linenr,line))
+        hsCmd("call setbufvar({},'&filetype','hideseek')".format(bufnr))
+        hsCmd("call setbufvar({},'&statusline','{}')".format(bufnr,manager._cur_dir))
         hsEval("hideseek#setHightLight()")
 
 
