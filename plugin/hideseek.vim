@@ -26,6 +26,9 @@ endfunction
 function hideseek#clearDict()
   let s:mlinesdict = {}
 endfunction
+function hideseek#test()
+  echo s:mlinesdict
+endfunction
 
 function hideseek#setCategory(category)
   let s:category = a:category

@@ -25,7 +25,7 @@ class MruExplorer(Explorer):
         content = []
         with hsOpen(self._mru_source_file, 'r+', errors='ignore') as f:
             lines = f.readlines()
-            curr_dir = self._curr_dir
+            curr_dir = hsGetCwd()
             start = 1
             hsEval("hideseek#clearDict()")
             for index in range(len(lines)):
