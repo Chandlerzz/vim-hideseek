@@ -19,6 +19,7 @@ class MruExplorer(Explorer):
         self._cmd_work_dir = ""
         self._cur_dir = ""
         self._mru_source_file = hsEval("get(g:,'hs_mru_source_file','')")
+        self._mru_max_line=hsEval("get(g:,'hs_mru_max_line',999)")
 
     def getContent(self, *args, **kwargs):
         content = []
@@ -36,10 +37,14 @@ class MruExplorer(Explorer):
                     hsEval("hideseek#addDict('{}',{})".format(start,dicts))
                     content.append(line)
                     start = start + 1
-            for index in range(len(content)):
+            mru_max_line=int(self._mru_max_line)
+            contentLength = len(content)
+            if contentLength >mru_max_line:
+                contentLength = mru_max_line
+            for index in range(contentLength):
                 content[index]=re.sub(cur_dir+"/","",content[index])
                 content[index] = "{}: {}".format(index+1, content[index])
-            return content
+            return content[:contentLength]
 
     def getStlCategory(self):
         return "mru"
