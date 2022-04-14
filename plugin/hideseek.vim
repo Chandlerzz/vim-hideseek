@@ -1,5 +1,5 @@
-" Copyright (c) 2022 zhongzhong
-" attention  
+  " Copyright (c) 2022 zhongzhong
+  " attention  
 " filter function will change the firser parameter. should copy it and pass it
 " exists function the parameter is String
 "
@@ -7,6 +7,7 @@
 nnoremap ew :call SelectBuffer("lrc")<cr>
 nnoremap ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>n :call OpenBufferList()<cr>
+
 " matched lines
 let s:category = "mru"
 let s:mlinesdict = {}
@@ -18,7 +19,32 @@ augroup bufferSel
   autocmd VimEnter * OpenBufferList 
   autocmd VimEnter,bufEnter,tabEnter,DirChanged * execute "Hideseek ".s:category
   autocmd DirChanged * call NERDTreeCWD1()
+  autocmd bufEnter *.hideseek nnoremap <buffer> d :call hideseek#delete()<cr> 
 augroup END
+
+function hideseek#delete()
+
+  let line = getline('.')
+  let num = 0
+  for i in range(len(line))
+    if(line[i] == ':')
+      let num = line[:i-1]
+      let num = str2nr(num)
+      break
+    endif
+  endfor
+  if(num != 0)
+    if(s:category == "mru")
+      if(num < 10)
+        call system("inoswp -s 0".num)
+      else
+        call system("inoswp -s ".num)
+      endif
+    endif
+  endif
+  execute "Hideseek mru"
+
+endfunction
 
 function hideseek#addDict(key,value)
   let s:mlinesdict[a:key] = a:value
@@ -150,6 +176,7 @@ function! s:inputtarget()
     autocmd VimEnter * OpenBufferList 
     autocmd VimEnter,bufEnter,tabEnter,DirChanged * execute "Hideseek ".s:category
     autocmd DirChanged * call NERDTreeCWD1()
+    autocmd bufEnter *.hideseek nnoremap <buffer> d :call hideseek#delete()<cr> 
   augroup END
   while c =~ '^\d\+$'
     let c .= s:getchar()
