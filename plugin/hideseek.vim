@@ -23,7 +23,6 @@ augroup bufferSel
 augroup END
 
 function hideseek#delete()
-
   let line = getline('.')
   let num = 0
   for i in range(len(line))
@@ -35,6 +34,7 @@ function hideseek#delete()
   endfor
   if(num != 0)
     if(s:category == "mru")
+      let num = s:mlinesdict[''.num]['lrc_num']
       if(num < 10)
         call system("inoswp -s 0".num)
       else
@@ -142,8 +142,11 @@ function SelectBuffer(type) abort
     endif
   elseif (a:type == "delete")
     let head = s:mlinesdict[''.head]['lrc_num']
-    let g:test = head
-    call system("inoswp -s ".head)
+    if(head < 10)
+      call system("inoswp -s 0".head)
+    else
+      call system("inoswp -s ".head)
+    endif
     execute "sleep"
     execute "Hideseek ".s:category
   else
