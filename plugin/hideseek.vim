@@ -4,8 +4,8 @@
 " exists function the parameter is String
 "
 " nnoremap ee :call SelectBuffer("")<cr>
-nnoremap ew :call SelectBuffer("lrc")<cr>
-nnoremap ed :call SelectBuffer("delete")<cr>
+nnoremap <leader>ew :call SelectBuffer("lrc")<cr>
+nnoremap <leader>ed :call SelectBuffer("delete")<cr>
 nnoremap <leader>n :call OpenBufferList()<cr>
 
 " matched lines
