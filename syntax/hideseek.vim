@@ -16,5 +16,7 @@ highlight default link hideseekReg Label
 highlight default link hideseekRegColon NonText
 highlight default link hideseekSelected Todo
 
+setlocal so=100
+
 
 let b:current_syntax = "hideseek"   
